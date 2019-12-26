@@ -1,0 +1,3 @@
+class Devices{
+  String name;
+}
