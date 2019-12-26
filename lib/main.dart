@@ -20,8 +20,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
-  debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+
+  if (Platform.isLinux || Platform.isWindows) {
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
 
   runApp(new MyApp());
 }
