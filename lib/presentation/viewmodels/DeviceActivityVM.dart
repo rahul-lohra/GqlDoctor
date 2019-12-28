@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:example_flutter/data/Devices.dart';
 
 import '../../domain/GetDevicesUseCase.dart';

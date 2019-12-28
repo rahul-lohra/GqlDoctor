@@ -40,7 +40,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
   }
 
   Widget getExceptionWidget(Fail fail){
-    return Text("Some error");
+    return Text("${fail.e}");
   }
 
   @override
