@@ -14,7 +14,7 @@
 
 import 'dart:io';
 
-import 'package:example_flutter/presentation/DevicesActivity.dart';
+import 'package:example_flutter/presentation/activities/DevicesActivity.dart';
 import 'package:flutter/foundation.dart'
     show debugDefaultTargetPlatformOverride;
 import 'package:flutter/material.dart';
