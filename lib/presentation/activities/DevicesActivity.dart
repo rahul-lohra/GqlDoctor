@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:example_flutter/data/Devices.dart';
+import 'package:example_flutter/presentation/routes/Router.dart';
 import 'package:example_flutter/presentation/viewmodels/DeviceActivityVM.dart';
 import 'package:flutter/material.dart';
 
@@ -32,7 +33,9 @@ class _DevicesActivityState extends State<DevicesActivity> {
         itemCount: deviceList.length,
         itemBuilder: (BuildContext ctx, int index) {
           return new Container(
-            child: Text(deviceList[index].name),
+            child: GestureDetector(child: Text(deviceList[index].name), onTap: (){
+              Router.routeToDeviceDetail(context);
+            },),
           );
         },
       ),
