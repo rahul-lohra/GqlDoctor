@@ -1,4 +1,5 @@
 import 'package:example_flutter/data/Devices.dart';
+import 'package:example_flutter/data/Result.dart';
 
 import '../../domain/GetDevicesUseCase.dart';
 
@@ -19,33 +20,5 @@ class DeviceActivityVM {
     }
     function(resultDevices);
 
-  }
-}
-
-class Result{
-
-}
-class Success<T> extends Result{
-  T data;
-  Success(T data){this.data = data;}
-}
-class Fail extends Result{
-  Exception e;
-  Fail(Exception e){this.e = e;}
-}
-class Loading extends Result{}
-
-class LiveData<T,E>{
-  T data;
-  E error;
-
-  success(T data){
-    this.data = data;
-    this.error = null;
-  }
-
-  fail(E error){
-    this.data = null;
-    this.error = error;
   }
 }

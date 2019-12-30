@@ -7,5 +7,10 @@ class DevicesRepository {
     Future<ProcessResult> result =  Process.run('adb', ['devices']);
     return result;
   }
+
+  Future<ProcessResult> getPackagesWhereLibraryIsInstalled() async{
+    Future<ProcessResult> result =  Process.run('adb', ['devices']);
+    return result;
+  }
     
 }
