@@ -15,6 +15,12 @@ class _DevicesActivityState extends State<DevicesActivity> {
   DeviceActivityVM devicesActivityVM = new DeviceActivityVM();
   Widget resultDeviceWidget = Container();
 
+
+  @override
+  void initState() {
+    devicesActivityVM.getConnectedDevices(showDevices);
+  }
+
   void showDevices(Result resultDevices) {
     setState(() {
       if(resultDevices is Success) {
