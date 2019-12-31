@@ -40,7 +40,8 @@ class _DevicesActivityState extends State<DevicesActivity> {
         itemBuilder: (BuildContext ctx, int index) {
           return new Container(
             child: GestureDetector(child: Text(deviceList[index].name), onTap: (){
-              Router.routeTo(context, DeviceDetailActivity());
+              String deviceName = deviceList[index].name.split("\t")[0];
+              Router.routeTo(context, DeviceDetailActivity(deviceName:deviceName,));
             },),
           );
         },
