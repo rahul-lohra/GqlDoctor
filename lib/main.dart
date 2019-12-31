@@ -18,11 +18,12 @@ import 'package:example_flutter/presentation/activities/DevicesActivity.dart';
 import 'package:flutter/foundation.dart'
     show debugDefaultTargetPlatformOverride;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 void main() {
   if (Platform.isLinux || Platform.isWindows) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
-
+  debugPaintSizeEnabled = false;
   runApp(new MyApp());
 }
 
