@@ -80,6 +80,18 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
               detailVM.listFiles();
             },
           ),
+          GestureDetector(
+            child: Text("Connect database", style: TextStyle(fontSize: 18)),
+            onTap: () {
+              detailVM.connectDatabase();
+            },
+          ),
+          GestureDetector(
+            child: Text("Show all tables", style: TextStyle(fontSize: 18)),
+            onTap: () {
+              detailVM.showAllTables();
+            },
+          ),
           historyWidgetList
         ],
       ),

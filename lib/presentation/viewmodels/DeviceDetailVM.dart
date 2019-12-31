@@ -6,6 +6,7 @@ import 'package:example_flutter/domain/GetPackagesUseCase.dart';
 class DeviceDetailVM {
   GetPackagesUseCase useCase;
   Process emulatorProcess;
+  Process sqlProcess;
 
   DeviceDetailVM(GetPackagesUseCase getPackagesUseCase) {
     this.useCase = getPackagesUseCase;
@@ -65,8 +66,12 @@ class DeviceDetailVM {
   listFiles() async {
     if (emulatorProcess != null) {
       emulatorProcess.stdin.writeln("ls");
-//      emulatorProcess.stdin.flush();
-//      emulatorProcess.stdin.close();
+    }
+  }
+
+  connectDatabase() async {
+    if (emulatorProcess != null) {
+      emulatorProcess.stdin.writeln("app_gqlLibs/sqlite3 'databases/gqlDb'");
     }
   }
 
@@ -82,14 +87,9 @@ class DeviceDetailVM {
   }
 
   showAllTables() async {
-    List<String> arguments = new List();
-    arguments.add('cd');
-    arguments.add('app_gqlLibs');
-
-    Future<ProcessResult> result = Process.run('', arguments);
-    ProcessResult pr = await result;
-    print(pr.stdout);
-    return result;
+    if (emulatorProcess != null) {
+      emulatorProcess.stdin.writeln("Select * from Gql;");
+    }
   }
 
   showTables(String dbName) {}
