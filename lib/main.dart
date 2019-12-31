@@ -70,10 +70,10 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: getDevices(),
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
+//      floatingActionButton: FloatingActionButton(
+//        tooltip: 'Increment',
+//        child: Icon(Icons.add),
+//      ),
     );
   }
 

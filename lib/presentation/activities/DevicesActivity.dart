@@ -11,35 +11,97 @@ class DevicesActivity extends StatefulWidget {
 }
 
 class _DevicesActivityState extends State<DevicesActivity> {
-  List<Devices> deviceList = new List();
-  DeviceActivityVM devicesActivityVM = new DeviceActivityVM();
+  final List<Devices> deviceList = new List();
+  final DeviceActivityVM devicesActivityVM = new DeviceActivityVM();
   Widget resultDeviceWidget = Container();
+  RaisedButton buttonNext;
+  int selectedEmulator = -1;
+  bool cbPackageValue = false;
+  bool cbDbValue = false;
+
+  final packageController = TextEditingController();
+  final dbController = TextEditingController();
 
   @override
   void initState() {
+    buttonNext = RaisedButton(
+      onPressed: allDataIsReadyForOnNext()
+          ? () => onNextButtonClick()
+          : null,
+      child: const Text('Next', style: TextStyle(fontSize: 20)),
+      color: Colors.blue,
+      textColor: Colors.white,
+      elevation: 5,
+    );
+
     devicesActivityVM.getConnectedDevices(showDevices);
+    packageController.addListener(toggleButtonNext);
+    dbController.addListener(toggleButtonNext);
+  }
+
+  void toggleButtonNext(){
+    if(buttonNext.enabled ){
+      if(!allDataIsReadyForOnNext()){
+        setState(() {});
+      }
+    }else{
+      if(allDataIsReadyForOnNext()){
+        setState(() {});
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    packageController.dispose();
+    dbController.dispose();
+    super.dispose();
+  }
+
+  void onRadioButtonClick(int value) {
+    setState(() {
+      selectedEmulator = value;
+      resultDeviceWidget = getDevicesWidget();
+    });
   }
 
   void showDevices(Result resultDevices) {
     setState(() {
+      deviceList.clear();
       if (resultDevices is Success) {
-        resultDeviceWidget = getDevicesWidget(resultDevices.data);
+        deviceList.addAll(resultDevices.data);
+        resultDeviceWidget = getDevicesWidget();
       } else if (resultDevices is Fail) {
         resultDeviceWidget = getExceptionWidget(resultDevices);
       }
     });
   }
 
-  Widget getDevicesWidget(List<Devices> devices) {
-    deviceList.clear();
-    deviceList.addAll(devices);
+  onNextButtonClick() {
+    return null;
+  }
+
+  Widget getDevicesWidget() {
     return Expanded(
       child: ListView.builder(
         itemCount: deviceList.length,
         itemBuilder: (BuildContext ctx, int index) {
           return new Container(
             child: GestureDetector(
-              child: Text(deviceList[index].name),
+              child: Container(
+                child: Row(
+                  children: <Widget>[
+                    Radio(
+                      groupValue: selectedEmulator,
+                      value: index,
+                      onChanged: (value) {
+                        onRadioButtonClick(value);
+                      },
+                    ),
+                    Text(deviceList[index].name)
+                  ],
+                ),
+              ),
               onTap: () {
                 String deviceName = deviceList[index].name.split("\t")[0];
                 Router.routeTo(
@@ -55,106 +117,149 @@ class _DevicesActivityState extends State<DevicesActivity> {
     );
   }
 
+  bool allDataIsReadyForOnNext() {
+    bool textFieldsAreNotEmpty =
+        packageController.text.isNotEmpty && dbController.text.isNotEmpty;
+    bool emulatorIsSelected = selectedEmulator > -1 &&
+        selectedEmulator < deviceList.length &&
+        deviceList.length > 0;
+    return textFieldsAreNotEmpty && emulatorIsSelected;
+  }
+
   Widget getExceptionWidget(Fail fail) {
     return Text("${fail.e}");
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: EdgeInsets.all(10),
-        child: Container(
-          child: Column(
-            children: <Widget>[
-              Row(children: <Widget>[
-                Container(
-                  margin: EdgeInsets.fromLTRB(16, 0, 0, 0),
-                  child: Text(
-                    "Package name",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                    child: TextField(
-                      decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Enter a package'),
-                    ),
-                  ),
-                )
-              ]),
-              Row(children: <Widget>[
-                Checkbox(
-                  value: false,
-                  onChanged: (value) {},
-                ),
-                Container(
-                  margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                  child: Text(
-                    "Use this package by default",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                )
-              ]),
-              Row(children: <Widget>[
-                Container(
-                  margin: EdgeInsets.fromLTRB(16, 0, 0, 0),
-                  child: Text(
-                    "Database name",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                    child: TextField(
-                      decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Enter database name'),
-                    ),
-                  ),
-                )
-              ]),
-              Row(children: <Widget>[
-                Checkbox(
-                  value: false,
-                  onChanged: (value) {},
-                ),
-                Container(
-                  margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                  child: Text(
-                    "Use this database by default",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                )
-              ]),
-              Container(
-                margin: EdgeInsets.fromLTRB(16, 20, 0, 0),
-                child: Row(
+    return Container(
+      child: Stack(
+        children: <Widget>[
+          Padding(
+              padding: EdgeInsets.all(10),
+              child: Container(
+                child: Column(
                   children: <Widget>[
+                    Row(children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.fromLTRB(16, 0, 0, 0),
+                        child: Text(
+                          "Package name",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                          child: TextField(
+                            controller: packageController,
+                            decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: 'Enter a package'),
+                          ),
+                        ),
+                      )
+                    ]),
+                    Row(children: <Widget>[
+                      Checkbox(
+                        value: cbPackageValue,
+                        onChanged: (value) {
+                          setState(() {
+                            cbPackageValue = value;
+                          });
+                        },
+                      ),
+                      Container(
+                        margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                        child: Text(
+                          "Use this package by default",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      )
+                    ]),
+                    Row(children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.fromLTRB(16, 0, 0, 0),
+                        child: Text(
+                          "Database name",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                          child: TextField(
+                            controller: dbController,
+                            decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: 'Enter database name'),
+                          ),
+                        ),
+                      )
+                    ]),
+                    Row(children: <Widget>[
+                      Checkbox(
+                        value: cbDbValue,
+                        onChanged: (value) {
+                          setState(() {
+                            cbDbValue = value;
+                          });
+                        },
+                      ),
+                      Container(
+                        margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                        child: Text(
+                          "Use this database by default",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      )
+                    ]),
                     Container(
-                      child: Text(
-                        "Connected Devices",
-                        style: TextStyle(fontSize: 24),
+                      margin: EdgeInsets.fromLTRB(16, 20, 0, 0),
+                      child: Row(
+                        children: <Widget>[
+                          Container(
+                            child: Text(
+                              "Connected Devices",
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.fromLTRB(
+                              400,
+                              0,
+                              0,
+                              0,
+                            ),
+                            child: FlatButton(
+                              child: Text(
+                                "Refresh",
+                                style: TextStyle(fontSize: 20),
+                              ),
+                              onPressed: () {
+                                devicesActivityVM
+                                    .getConnectedDevices(showDevices);
+                              },
+                            ),
+                          )
+                        ],
                       ),
                     ),
-                    Container(margin:EdgeInsets.fromLTRB(400, 0,0,0,),child: FlatButton(
-                      child: Text(
-                        "Refresh",
-                        style: TextStyle(fontSize: 20),
-                      ),
-                      onPressed: () {
-                        devicesActivityVM.getConnectedDevices(showDevices);
-                      },
-                    ),)
+                    resultDeviceWidget
                   ],
                 ),
-              ),
-              resultDeviceWidget
-            ],
-          ),
-        ));
+              )),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Container(
+              margin: EdgeInsets.all(20),
+              child: buttonNext,
+            ),
+          )
+        ],
+      ),
+    );
   }
+
+
 }
