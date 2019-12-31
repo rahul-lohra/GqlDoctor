@@ -14,7 +14,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
   final List<Devices> deviceList = new List();
   final DeviceActivityVM devicesActivityVM = new DeviceActivityVM();
   Widget resultDeviceWidget = Container();
-  RaisedButton buttonNext;
+  RaisedButton btnNext;
   int selectedEmulator = -1;
   bool cbPackageValue = false;
   bool cbDbValue = false;
@@ -24,29 +24,24 @@ class _DevicesActivityState extends State<DevicesActivity> {
 
   @override
   void initState() {
-    buttonNext = RaisedButton(
-      onPressed: allDataIsReadyForOnNext()
-          ? () => onNextButtonClick()
-          : null,
-      child: const Text('Next', style: TextStyle(fontSize: 20)),
-      color: Colors.blue,
-      textColor: Colors.white,
-      elevation: 5,
-    );
-
+    btnNext = getButtonNext();
     devicesActivityVM.getConnectedDevices(showDevices);
     packageController.addListener(toggleButtonNext);
     dbController.addListener(toggleButtonNext);
   }
 
-  void toggleButtonNext(){
-    if(buttonNext.enabled ){
-      if(!allDataIsReadyForOnNext()){
-        setState(() {});
+  void toggleButtonNext() {
+    if (btnNext.enabled) {
+      if (!allDataIsReadyForOnNext()) {
+        setState(() {
+          btnNext = getButtonNext();
+        });
       }
-    }else{
-      if(allDataIsReadyForOnNext()){
-        setState(() {});
+    } else {
+      if (allDataIsReadyForOnNext()) {
+        setState(() {
+          btnNext = getButtonNext();
+        });
       }
     }
   }
@@ -62,6 +57,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
     setState(() {
       selectedEmulator = value;
       resultDeviceWidget = getDevicesWidget();
+      toggleButtonNext();
     });
   }
 
@@ -78,7 +74,8 @@ class _DevicesActivityState extends State<DevicesActivity> {
   }
 
   onNextButtonClick() {
-    return null;
+    String deviceName = deviceList[selectedEmulator].name.split("\t")[0];
+    openDetailActivity(deviceName);
   }
 
   Widget getDevicesWidget() {
@@ -101,20 +98,20 @@ class _DevicesActivityState extends State<DevicesActivity> {
                     Text(deviceList[index].name)
                   ],
                 ),
-              ),
-              onTap: () {
-                String deviceName = deviceList[index].name.split("\t")[0];
-                Router.routeTo(
-                    context,
-                    DeviceDetailActivity(
-                      deviceName: deviceName,
-                    ));
-              },
+              ),            
             ),
           );
         },
       ),
     );
+  }
+
+  void openDetailActivity(String deviceName) {
+    Router.routeTo(
+        context,
+        DeviceDetailActivity(
+          deviceName: deviceName,
+        ));
   }
 
   bool allDataIsReadyForOnNext() {
@@ -128,6 +125,16 @@ class _DevicesActivityState extends State<DevicesActivity> {
 
   Widget getExceptionWidget(Fail fail) {
     return Text("${fail.e}");
+  }
+
+  RaisedButton getButtonNext() {
+    return RaisedButton(
+      onPressed: allDataIsReadyForOnNext() ? () => onNextButtonClick() : null,
+      child: const Text('Next', style: TextStyle(fontSize: 20)),
+      color: Colors.blue,
+      textColor: Colors.white,
+      elevation: 5,
+    );
   }
 
   @override
@@ -253,13 +260,11 @@ class _DevicesActivityState extends State<DevicesActivity> {
             alignment: Alignment.bottomRight,
             child: Container(
               margin: EdgeInsets.all(20),
-              child: buttonNext,
+              child: btnNext,
             ),
           )
         ],
       ),
     );
   }
-
-
 }
