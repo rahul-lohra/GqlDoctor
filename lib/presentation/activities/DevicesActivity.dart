@@ -78,6 +78,23 @@ class _DevicesActivityState extends State<DevicesActivity> {
     openDetailActivity(deviceName);
   }
 
+  void openDetailActivity(String deviceName) {
+    Router.routeTo(
+        context,
+        DeviceDetailActivity(
+          deviceName: deviceName,
+        ));
+  }
+
+  bool allDataIsReadyForOnNext() {
+    bool textFieldsAreNotEmpty =
+        packageController.text.isNotEmpty && dbController.text.isNotEmpty;
+    bool emulatorIsSelected = selectedEmulator > -1 &&
+        selectedEmulator < deviceList.length &&
+        deviceList.length > 0;
+    return textFieldsAreNotEmpty && emulatorIsSelected;
+  }
+
   Widget getDevicesWidget() {
     return Expanded(
       child: ListView.builder(
@@ -98,29 +115,12 @@ class _DevicesActivityState extends State<DevicesActivity> {
                     Text(deviceList[index].name)
                   ],
                 ),
-              ),            
+              ),
             ),
           );
         },
       ),
     );
-  }
-
-  void openDetailActivity(String deviceName) {
-    Router.routeTo(
-        context,
-        DeviceDetailActivity(
-          deviceName: deviceName,
-        ));
-  }
-
-  bool allDataIsReadyForOnNext() {
-    bool textFieldsAreNotEmpty =
-        packageController.text.isNotEmpty && dbController.text.isNotEmpty;
-    bool emulatorIsSelected = selectedEmulator > -1 &&
-        selectedEmulator < deviceList.length &&
-        deviceList.length > 0;
-    return textFieldsAreNotEmpty && emulatorIsSelected;
   }
 
   Widget getExceptionWidget(Fail fail) {
