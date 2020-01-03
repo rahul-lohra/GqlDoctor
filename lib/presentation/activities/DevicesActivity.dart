@@ -1,9 +1,15 @@
 import 'package:example_flutter/data/Devices.dart';
 import 'package:example_flutter/data/Result.dart';
+import 'package:example_flutter/data/moor_database.dart';
+import 'package:example_flutter/domain/GetDefaultConfigUseCase.dart';
+import 'package:example_flutter/domain/GetDevicesUseCase.dart';
+import 'package:example_flutter/domain/LocalRepository.dart';
 import 'package:example_flutter/presentation/activities/DeviceDetailActivity.dart';
 import 'package:example_flutter/presentation/routes/Router.dart';
 import 'package:example_flutter/presentation/viewmodels/DeviceActivityVM.dart';
 import 'package:flutter/material.dart';
+import 'package:moor/moor.dart' as moor;
+import 'package:provider/provider.dart';
 
 class DevicesActivity extends StatefulWidget {
   @override
@@ -12,7 +18,7 @@ class DevicesActivity extends StatefulWidget {
 
 class _DevicesActivityState extends State<DevicesActivity> {
   final List<Devices> deviceList = new List();
-  final DeviceActivityVM devicesActivityVM = new DeviceActivityVM();
+  DeviceActivityVM devicesActivityVM;
   Widget resultDeviceWidget = Container();
   RaisedButton btnNext;
   int selectedEmulator = -1;
@@ -24,10 +30,17 @@ class _DevicesActivityState extends State<DevicesActivity> {
 
   @override
   void initState() {
+    final dao = Provider.of<PackageTableDao>(context, listen: false);
+    var defaultConfigUseCase = GetDefaultConfigUseCase(LocalRepository(dao));
+    devicesActivityVM =
+        new DeviceActivityVM(GetDevicesUseCase(), defaultConfigUseCase);
+
     btnNext = getButtonNext();
-    devicesActivityVM.getConnectedDevices(showDevices);
     packageController.addListener(toggleButtonNext);
     dbController.addListener(toggleButtonNext);
+
+    devicesActivityVM.getConnectedDevices(showDevices);
+    devicesActivityVM.getDefaultPackageName(showDefaultPackageName);
   }
 
   void toggleButtonNext() {
@@ -61,6 +74,14 @@ class _DevicesActivityState extends State<DevicesActivity> {
     });
   }
 
+  void showDefaultPackageName(Result packageNameResult) {
+    setState(() {
+      if(packageNameResult is Success) {
+        packageController.text = packageNameResult.data;
+      }
+    });
+  }
+
   void showDevices(Result resultDevices) {
     setState(() {
       deviceList.clear();
@@ -74,8 +95,19 @@ class _DevicesActivityState extends State<DevicesActivity> {
   }
 
   onNextButtonClick() {
+    savePackageName();
     String deviceName = deviceList[selectedEmulator].name.split("\t")[0];
     openDetailActivity(deviceName);
+  }
+
+  savePackageName() {
+    devicesActivityVM.createOrUpdatePackage(
+        packageController.text, cbPackageValue);
+  }
+
+  readValuesFromDatabase(PackageTableDao dao) async {
+    List<PackageTableData> list = await dao.getEnabledPackage();
+    list.forEach((t) => print("data =  ${t.name}"));
   }
 
   void openDetailActivity(String deviceName) {

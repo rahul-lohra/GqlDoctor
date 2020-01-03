@@ -14,17 +14,27 @@
 
 import 'dart:io';
 
+import 'package:example_flutter/data/moor_database.dart';
 import 'package:example_flutter/presentation/activities/DevicesActivity.dart';
 import 'package:flutter/foundation.dart'
     show debugDefaultTargetPlatformOverride;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
+
 void main() {
   if (Platform.isLinux || Platform.isWindows) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
   debugPaintSizeEnabled = false;
-  runApp(new MyApp());
+
+  AppDatabase appDatabase = AppDatabase();
+  var dao = Provider<PackageTableDao>(create: (_) => appDatabase.packageTableDao);
+
+  runApp(MultiProvider(
+    providers: [dao],
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -70,10 +80,6 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: getDevices(),
-//      floatingActionButton: FloatingActionButton(
-//        tooltip: 'Increment',
-//        child: Icon(Icons.add),
-//      ),
     );
   }
 
