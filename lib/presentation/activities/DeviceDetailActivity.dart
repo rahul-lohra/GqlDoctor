@@ -1,26 +1,57 @@
+import 'package:example_flutter/data/Result.dart';
 import 'package:example_flutter/domain/GetPackagesUseCase.dart';
 import 'package:example_flutter/presentation/HexColor.dart';
+import 'package:example_flutter/presentation/data/DeviceDetailData.dart';
 import 'package:example_flutter/presentation/viewmodels/DeviceDetailVM.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class DeviceDetailActivity extends StatefulWidget {
-  final String deviceName;
+  final DeviceDetailData deviceDetailData;
 
-  const DeviceDetailActivity({Key key, this.deviceName}) : super(key: key);
+  const DeviceDetailActivity({Key key, this.deviceDetailData}) : super(key: key);
 
   @override
   _DeviceDetailActivityState createState() =>
-      _DeviceDetailActivityState(deviceName);
+      _DeviceDetailActivityState(deviceDetailData);
 }
 
 class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
-  DeviceDetailVM detailVM = new DeviceDetailVM(new GetPackagesUseCase());
-  final String deviceName;
+  final DeviceDetailData deviceDetailData;
+  DeviceDetailVM detailVM;
+  StringBuffer outputStringBuilder;
+  Widget historyWidgetList;
 
-  Widget historyWidgetList = Container();
+  _DeviceDetailActivityState(this.deviceDetailData);
 
-  _DeviceDetailActivityState(this.deviceName);
+  @override
+  void initState() {
+    historyWidgetList = Container();
+    outputStringBuilder = StringBuffer();
+    detailVM =  DeviceDetailVM(new GetPackagesUseCase(), processCallback);
+    detailVM.getPackagesWhereLibraryIsInstalled(showPackages);
+    detailVM.createConnection(deviceDetailData.deviceName,deviceDetailData.packageName, deviceDetailData.databaseName, connectionCallback);
+  }
+
+  void processCallback(Result result){
+    setState(() {
+      if(result is Success){
+        outputStringBuilder.writeln(result.data);
+      }else if (result is Fail){
+        outputStringBuilder.writeln(result.e);
+      }
+    });
+  }
+
+  void connectionCallback(Result result){
+    setState(() {
+      if(result is Success){
+        outputStringBuilder.writeln(result.data);
+      }else if(result is Fail){
+        outputStringBuilder.writeln(result.e);
+      }
+    });
+  }
 
   void showPackages(Set<String> packageList) {
     setState(() {
@@ -37,7 +68,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
             child: GestureDetector(
               child: Text(packageList[index]),
               onTap: () {
-                detailVM.connectEmulator(deviceName);
+//                detailVM.connectEmulator(deviceName);
               },
             ),
           );
@@ -48,10 +79,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
 
   void handleUpdateTableName() {}
 
-  @override
-  void initState() {
-    detailVM.getPackagesWhereLibraryIsInstalled(showPackages);
-  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +182,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
             margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
             height: 100,
             width: double.infinity,
-            child: Text(""),
+            child: Text(outputStringBuilder.toString()),
             color: HexColor("#e5e5e5"),
           ),
           Row(
@@ -206,7 +234,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
             style: TextStyle(fontSize: 18),
           ),
           onTap: () {
-            detailVM.connectEmulator(deviceName);
+//            detailVM.connectEmulator(deviceName);
           },
         ),
         GestureDetector(
@@ -224,7 +252,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
         GestureDetector(
           child: Text("Connect database", style: TextStyle(fontSize: 18)),
           onTap: () {
-            detailVM.connectDatabase();
+            detailVM.connectDatabase("gqlDb");
           },
         ),
         GestureDetector(

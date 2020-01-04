@@ -15,10 +15,11 @@ void main() {
   debugPaintSizeEnabled = false;
 
   AppDatabase appDatabase = AppDatabase();
-  var dao = Provider<PackageTableDao>(create: (_) => appDatabase.packageTableDao);
+  var packageDao = Provider<PackageTableDao>(create: (_) => appDatabase.packageTableDao);
+  var mobileDbDao = Provider<MobileDbTableDao>(create: (_) => appDatabase.mobileDbTableDao);
 
   runApp(MultiProvider(
-    providers: [dao],
+    providers: [packageDao,mobileDbDao],
     child: MyApp(),
   ));
 }

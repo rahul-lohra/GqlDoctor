@@ -1,15 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:example_flutter/data/Result.dart';
 import 'package:example_flutter/domain/GetPackagesUseCase.dart';
 
 class DeviceDetailVM {
   GetPackagesUseCase useCase;
   Process emulatorProcess;
   Process sqlProcess;
+  Function processCallback;
 
-  DeviceDetailVM(GetPackagesUseCase getPackagesUseCase) {
+  DeviceDetailVM(GetPackagesUseCase getPackagesUseCase, Function processCallback) {
     this.useCase = getPackagesUseCase;
+    this.processCallback = processCallback;
   }
 
   Future<void> getPackagesWhereLibraryIsInstalled(Function function) async {
@@ -25,6 +28,21 @@ class DeviceDetailVM {
     return result;
   }
 
+  void createConnection(String deviceName, String packageName, String databaseName, Function function){
+    Result result;
+    try{
+    connectEmulator(deviceName);
+    gotoPackage(packageName);
+    listFiles();
+    connectDatabase(databaseName);
+    String message = "Connection to database Successfull";
+    result = Success(message);
+    }catch(err){
+      result = Fail(err);
+    }
+    function(result);
+  }
+
   connectEmulator(String name) async {
     List<String> arguments = new List();
     arguments.add('-s');
@@ -37,11 +55,13 @@ class DeviceDetailVM {
     emulatorProcess.stdout.transform(utf8.decoder).listen((data) {
       print("------DATA-----");
       print(data);
+      processCallback(Success(data));
     });
 
     emulatorProcess.stderr.transform(utf8.decoder).listen((data) {
       print("------ERROR-----");
       print(data);
+      processCallback(Fail(Exception(data)));
     });
 
     print(emulatorProcess.stdout);
@@ -69,9 +89,12 @@ class DeviceDetailVM {
     }
   }
 
-  connectDatabase() async {
+  connectDatabase(String databaseName) async {
     if (emulatorProcess != null) {
       emulatorProcess.stdin.writeln("app_gqlLibs/sqlite3 'databases/gqlDb'");
+      // String databasePath = 'databases/$databaseName';
+      // String sqlite3Path = 'app_gqlLibs/sqlite3';
+      // emulatorProcess.stdin.writeln("$sqlite3Path $databasePath");
     }
   }
 

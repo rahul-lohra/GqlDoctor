@@ -5,6 +5,7 @@ import 'package:example_flutter/domain/GetDefaultConfigUseCase.dart';
 import 'package:example_flutter/domain/GetDevicesUseCase.dart';
 import 'package:example_flutter/domain/LocalRepository.dart';
 import 'package:example_flutter/presentation/activities/DeviceDetailActivity.dart';
+import 'package:example_flutter/presentation/data/DeviceDetailData.dart';
 import 'package:example_flutter/presentation/routes/Router.dart';
 import 'package:example_flutter/presentation/viewmodels/DeviceActivityVM.dart';
 import 'package:flutter/material.dart';
@@ -30,10 +31,12 @@ class _DevicesActivityState extends State<DevicesActivity> {
 
   @override
   void initState() {
-    final dao = Provider.of<PackageTableDao>(context, listen: false);
-    var defaultConfigUseCase = GetDefaultConfigUseCase(LocalRepository(dao));
+    final packageDao = Provider.of<PackageTableDao>(context, listen: false);
+    final mobileDbDao = Provider.of<MobileDbTableDao>(context, listen: false);
+    var defaultConfigUseCase =
+        GetDefaultConfigUseCase(LocalRepository(packageDao, mobileDbDao));
     devicesActivityVM =
-        new DeviceActivityVM(GetDevicesUseCase(), defaultConfigUseCase);
+        DeviceActivityVM(GetDevicesUseCase(), defaultConfigUseCase);
 
     btnNext = getButtonNext();
     packageController.addListener(toggleButtonNext);
@@ -41,6 +44,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
 
     devicesActivityVM.getConnectedDevices(showDevices);
     devicesActivityVM.getDefaultPackageName(showDefaultPackageName);
+    devicesActivityVM.getDefaultDbName(showDefaultDbName);
   }
 
   void toggleButtonNext() {
@@ -76,8 +80,20 @@ class _DevicesActivityState extends State<DevicesActivity> {
 
   void showDefaultPackageName(Result packageNameResult) {
     setState(() {
-      if (packageNameResult is Success) {
+      if (packageNameResult is Success &&
+          (packageNameResult.data as String).isNotEmpty) {
         packageController.text = packageNameResult.data;
+        cbPackageValue = true;
+      }
+    });
+  }
+
+  void showDefaultDbName(Result packageNameResult) {
+    setState(() {
+      if (packageNameResult is Success &&
+          (packageNameResult.data as String).isNotEmpty) {
+        dbController.text = packageNameResult.data;
+        cbDbValue = true;
       }
     });
   }
@@ -95,15 +111,14 @@ class _DevicesActivityState extends State<DevicesActivity> {
   }
 
   onNextButtonClick() {
-    //todo Rahul enable later
-//    savePackageName();
-//    String deviceName = deviceList[selectedEmulator].name.split("\t")[0];
-    openDetailActivity("deviceName");
+    saveSettings();
+    String deviceName = deviceList[selectedEmulator].name.split("\t")[0];
+    openDetailActivity(deviceName, packageController.text, dbController.text);
   }
 
-  savePackageName() {
+  saveSettings() {
     devicesActivityVM.createOrUpdatePackage(
-        packageController.text, cbPackageValue);
+        packageController.text, cbPackageValue, dbController.text, cbDbValue);
   }
 
   readValuesFromDatabase(PackageTableDao dao) async {
@@ -111,11 +126,14 @@ class _DevicesActivityState extends State<DevicesActivity> {
     list.forEach((t) => print("data =  ${t.name}"));
   }
 
-  void openDetailActivity(String deviceName) {
+  void openDetailActivity(
+      String deviceName, String packageName, String databaseName) {
+    DeviceDetailData deviceDetailData =
+        DeviceDetailData(packageName, databaseName, deviceName);
     Router.routeTo(
         context,
         DeviceDetailActivity(
-          deviceName: deviceName,
+          deviceDetailData: deviceDetailData,
         ),
         deviceName);
   }
@@ -163,8 +181,8 @@ class _DevicesActivityState extends State<DevicesActivity> {
 
   RaisedButton getButtonNext() {
     return RaisedButton(
-//      onPressed: allDataIsReadyForOnNext() ? () => onNextButtonClick() : null,
-      onPressed: onNextButtonClick,
+      onPressed: allDataIsReadyForOnNext() ? () => onNextButtonClick() : null,
+//      onPressed: onNextButtonClick,
       child: const Text('Next', style: TextStyle(fontSize: 20)),
       color: Colors.blue,
       textColor: Colors.white,
@@ -273,7 +291,9 @@ class _DevicesActivityState extends State<DevicesActivity> {
                               0,
                               0,
                             ),
-                            child: FlatButton(
+                            child: RaisedButton(
+                              color: Colors.blue,
+                              textColor: Colors.white,
                               child: Text(
                                 "Refresh",
                                 style: TextStyle(fontSize: 20),

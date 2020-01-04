@@ -16,7 +16,20 @@ class GetDefaultConfigUseCase {
     }
   }
 
+  Future<String> getDefaultDbName() async {
+    List<MobileDbTableData> list = await localRepository.getDefaultDb();
+    if (list.isEmpty) {
+      return "";
+    } else {
+      return list[0].name;
+    }
+  }
+
   void createOrUpdatePackage(String packageName, bool isEnabled) {
     localRepository.createOrUpdatePackage(packageName, isEnabled);
+  }
+
+  void createOrUpdateMobileDb(String databaseName, bool isEnabled) {
+    localRepository.createOrUpdateMobileDb(databaseName, isEnabled);
   }
 }

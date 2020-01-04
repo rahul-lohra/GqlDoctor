@@ -21,11 +21,23 @@ class DeviceActivityVM {
     function(defaultPackageName);
   }
 
-  void createOrUpdatePackage(String packageName, bool isEnabled){
+  Future<void> getDefaultDbName(Function function)async {
+    Result defaultDbName;
     try{
-      getDefaultConfigUseCase.createOrUpdatePackage(packageName, isEnabled);
+      String name = await getDefaultConfigUseCase.getDefaultDbName();
+      defaultDbName = Success(name);
     }catch(err){
-      //do nothing
+      defaultDbName = Fail(err);
+    }
+    function(defaultDbName);
+  }
+
+  void createOrUpdatePackage(String packageName, bool isPackageEnabled, String dbName, bool isDbEnabled){
+    try{
+      getDefaultConfigUseCase.createOrUpdatePackage(packageName, isPackageEnabled);
+      getDefaultConfigUseCase.createOrUpdateMobileDb(dbName, isDbEnabled);
+    }catch(err){
+      print(err);
     }
   }
 
@@ -36,12 +48,6 @@ class DeviceActivityVM {
       resultDevices = Success(devices);
     }catch(err){
       resultDevices = Fail(err);
-
-      //todo Rahul Remove later
-//      List<Devices> devices = new List();
-//      devices.add(Devices("Emulator 5554 -1"));
-//      devices.add(Devices("Emulator 5554 -2"));
-//      resultDevices = Success(devices);
     }
     function(resultDevices);
 
