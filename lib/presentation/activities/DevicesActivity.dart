@@ -95,9 +95,10 @@ class _DevicesActivityState extends State<DevicesActivity> {
   }
 
   onNextButtonClick() {
-    savePackageName();
-    String deviceName = deviceList[selectedEmulator].name.split("\t")[0];
-    openDetailActivity(deviceName);
+    //todo Rahul enable later
+//    savePackageName();
+//    String deviceName = deviceList[selectedEmulator].name.split("\t")[0];
+    openDetailActivity("deviceNameq");
   }
 
   savePackageName() {
@@ -161,7 +162,8 @@ class _DevicesActivityState extends State<DevicesActivity> {
 
   RaisedButton getButtonNext() {
     return RaisedButton(
-      onPressed: allDataIsReadyForOnNext() ? () => onNextButtonClick() : null,
+//      onPressed: allDataIsReadyForOnNext() ? () => onNextButtonClick() : null,
+      onPressed: onNextButtonClick,
       child: const Text('Next', style: TextStyle(fontSize: 20)),
       color: Colors.blue,
       textColor: Colors.white,
