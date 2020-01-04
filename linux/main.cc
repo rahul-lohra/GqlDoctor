@@ -60,9 +60,9 @@ int main(int argc, char **argv) {
 
   flutter::FlutterWindowController flutter_controller(icu_data_path);
   flutter::WindowProperties window_properties = {};
-  window_properties.title = "Flutter Desktop Example";
-  window_properties.width = 800;
-  window_properties.height = 600;
+  window_properties.title = "Droid Db explorer";
+  window_properties.width = 1200;
+  window_properties.height = 800;
 
   // Start the engine.
   if (!flutter_controller.CreateWindow(window_properties, assets_path,

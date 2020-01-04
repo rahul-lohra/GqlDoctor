@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:example_flutter/data/moor_database.dart';
 import 'package:example_flutter/presentation/activities/DevicesActivity.dart';
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Settings',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         // See https://github.com/flutter/flutter/wiki/Desktop-shells#fonts
