@@ -55,15 +55,17 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
 
   @override
   Widget build(BuildContext context) {
+    double tableNameFieldWidth = 150;
     return Container(
       child: Column(
         children: <Widget>[
           Row(children: <Widget>[
             Container(
-              margin: EdgeInsets.fromLTRB(16, 0, 0, 0),
+              width: tableNameFieldWidth,
+              margin: EdgeInsets.fromLTRB(16, 16, 0, 0),
               child: Text(
                 "Database name",
-                style: TextStyle(fontSize: 16),
+                style: TextStyle(fontSize: 18),
               ),
             ),
             Expanded(
@@ -71,17 +73,18 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
                 margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: TextField(
                   decoration: InputDecoration(
-                      border: InputBorder.none, hintText: 'Enter databse name'),
+                      border: UnderlineInputBorder(), hintText: 'Enter databse name'),
                 ),
               ),
             )
           ]),
           Row(children: <Widget>[
             Container(
-              margin: EdgeInsets.fromLTRB(16, 0, 0, 0),
+              width: tableNameFieldWidth,
+              margin: EdgeInsets.fromLTRB(16, 18, 0, 0),
               child: Text(
                 "Table name",
-                style: TextStyle(fontSize: 16),
+                style: TextStyle(fontSize: 18),
               ),
             ),
             Expanded(
@@ -89,7 +92,8 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
                 margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: TextField(
                   decoration: InputDecoration(
-                      border: InputBorder.none, hintText: 'Enter table name'),
+                      border: UnderlineInputBorder(),
+                      hintText: 'Enter table name'),
                 ),
               ),
             )
@@ -168,6 +172,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
     list.add("Read");
     list.add("Update");
     list.add("Delete");
+    list.add("Back");
 
     List<Widget> buttonList = List();
     list.forEach((it) {
@@ -243,10 +248,9 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
                   margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
                   width: 300,
                   child: TextField(
-                    obscureText: true,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
-                      labelText: 'Enter column name',
+                      labelText: 'Column name',
                     ),
                   ),
                 ),
@@ -254,10 +258,9 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
                   child: Container(
                     margin: EdgeInsets.fromLTRB(0, 10, 10, 0),
                     child: TextField(
-                      obscureText: true,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: 'Enter value',
+                        labelText: 'Value',
                       ),
                     ),
                   ),
