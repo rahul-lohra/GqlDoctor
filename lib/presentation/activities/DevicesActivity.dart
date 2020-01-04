@@ -76,7 +76,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
 
   void showDefaultPackageName(Result packageNameResult) {
     setState(() {
-      if(packageNameResult is Success) {
+      if (packageNameResult is Success) {
         packageController.text = packageNameResult.data;
       }
     });
@@ -98,7 +98,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
     //todo Rahul enable later
 //    savePackageName();
 //    String deviceName = deviceList[selectedEmulator].name.split("\t")[0];
-    openDetailActivity("deviceNameq");
+    openDetailActivity("deviceName");
   }
 
   savePackageName() {
@@ -116,7 +116,8 @@ class _DevicesActivityState extends State<DevicesActivity> {
         context,
         DeviceDetailActivity(
           deviceName: deviceName,
-        ));
+        ),
+        deviceName);
   }
 
   bool allDataIsReadyForOnNext() {
