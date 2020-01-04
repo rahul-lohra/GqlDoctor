@@ -80,21 +80,30 @@ class DeviceDetailVM {
 
     if (emulatorProcess != null) {
       emulatorProcess.stdin.writeln("run-as ${packageName}");
+    }else {
+      killOldProcess();
+      throw Exception("Emulator Process is null in finding package");
     }
   }
 
   listFiles() async {
     if (emulatorProcess != null) {
       emulatorProcess.stdin.writeln("ls");
+    }else {
+      killOldProcess();
+      throw Exception("Emulator Process is null in listing files");
     }
   }
 
   connectDatabase(String databaseName) async {
     if (emulatorProcess != null) {
-      emulatorProcess.stdin.writeln("app_gqlLibs/sqlite3 'databases/gqlDb'");
-      // String databasePath = 'databases/$databaseName';
-      // String sqlite3Path = 'app_gqlLibs/sqlite3';
-      // emulatorProcess.stdin.writeln("$sqlite3Path $databasePath");
+      // emulatorProcess.stdin.writeln("app_gqlLibs/sqlite3 'databases/gqlDb'");
+      String databasePath = 'databases/$databaseName';
+      String sqlite3Path = 'app_gqlLibs/sqlite3';
+      emulatorProcess.stdin.writeln("$sqlite3Path $databasePath");
+    }else {
+      killOldProcess();
+      throw Exception("Emulator Process is null Connecting db");
     }
   }
 

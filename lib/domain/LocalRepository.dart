@@ -16,14 +16,14 @@ class LocalRepository {
 
   void createOrUpdatePackage(String packageName, bool isEnabled) {
     if(packageName.isNotEmpty){
-      packageTableDao.insertOrUpdatePackage(PackageTableCompanion(
+      packageTableDao.insertOrUpdateRecord(PackageTableCompanion(
           name: moor.Value(packageName), isEnabled: moor.Value(isEnabled)));
     }
   }
 
   void createOrUpdateMobileDb(String dbName, bool isEnabled) {
     if(dbName.isNotEmpty){
-      mobileDbTableDao.insertOrUpdatePackage(MobileDbTableCompanion(
+      mobileDbTableDao.insertOrUpdateRecord(MobileDbTableCompanion(
           name: moor.Value(dbName), isEnabled: moor.Value(isEnabled)));
     }
   }

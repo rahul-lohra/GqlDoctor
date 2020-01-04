@@ -54,17 +54,17 @@ class PackageTableDao extends DatabaseAccessor<AppDatabase>
         .get();
   }
 
-  Future<int> insertOrUpdatePackage(PackageTableCompanion package) {
-    int count = _isPackagePresent(package.name.value);
-    if (count == 0) {
+  Future<int> insertOrUpdateRecord(PackageTableCompanion package) async{
+    List<PackageTableData> list = await _isPackagePresent(package.name.value);
+    if (list.length == 0) {
       return into(packageTable).insert(package);
     } else {
       return update(packageTable).write(package);
     }
   }
 
-  _isPackagePresent(String packageNameName) async {
-    return await (select(packageTable)
+  Future<List<PackageTableData>> _isPackagePresent(String packageNameName) {
+    return (select(packageTable)
           ..where((t) => t.name.equals(packageNameName))
           ..limit(1))
         .get();
@@ -83,17 +83,17 @@ class MobileDbTableDao extends DatabaseAccessor<AppDatabase>
         .get();
   }
 
-  Future<int> insertOrUpdatePackage(MobileDbTableCompanion data) {
-    int count = _isPackagePresent(data.name.value);
-    if (count == 0) {
+  Future<int> insertOrUpdateRecord(MobileDbTableCompanion data) async {
+    List<MobileDbTableData> list = await _isRecordPresent(data.name.value);
+    if (list.length == 0) {
       return into(mobileDbTable).insert(data);
     } else {
       return update(mobileDbTable).write(data);
     }
   }
 
-  _isPackagePresent(String data) async {
-    return await (select(mobileDbTable)
+  Future<List<MobileDbTableData>>_isRecordPresent(String data) {
+    return (select(mobileDbTable)
       ..where((t) => t.name.equals(data))
       ..limit(1))
         .get();
