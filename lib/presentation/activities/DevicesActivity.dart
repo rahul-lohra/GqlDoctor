@@ -130,12 +130,12 @@ class _DevicesActivityState extends State<DevicesActivity> {
       String deviceName, String packageName, String databaseName) {
     DeviceDetailData deviceDetailData =
         DeviceDetailData(packageName, databaseName, deviceName);
+    DeviceDetailActivity activity = DeviceDetailActivity(deviceDetailData: deviceDetailData);
     Router.routeTo(
         context,
-        DeviceDetailActivity(
-          deviceDetailData: deviceDetailData,
-        ),
-        deviceName);
+        activity,
+        deviceName,
+    );
   }
 
   bool allDataIsReadyForOnNext() {

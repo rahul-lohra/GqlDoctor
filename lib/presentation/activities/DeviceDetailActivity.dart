@@ -2,14 +2,15 @@ import 'package:example_flutter/data/Result.dart';
 import 'package:example_flutter/domain/GetPackagesUseCase.dart';
 import 'package:example_flutter/presentation/HexColor.dart';
 import 'package:example_flutter/presentation/data/DeviceDetailData.dart';
+import 'package:example_flutter/presentation/routes/Router.dart';
 import 'package:example_flutter/presentation/viewmodels/DeviceDetailVM.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class DeviceDetailActivity extends StatefulWidget {
   final DeviceDetailData deviceDetailData;
-
-  const DeviceDetailActivity({Key key, this.deviceDetailData}) : super(key: key);
+  const DeviceDetailActivity({Key key, this.deviceDetailData})
+      : super(key: key);
 
   @override
   _DeviceDetailActivityState createState() =>
@@ -28,26 +29,33 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   void initState() {
     historyWidgetList = Container();
     outputStringBuilder = StringBuffer();
-    detailVM =  DeviceDetailVM(new GetPackagesUseCase(), processCallback);
-    detailVM.getPackagesWhereLibraryIsInstalled(showPackages);
-    detailVM.createConnection(deviceDetailData.deviceName,deviceDetailData.packageName, deviceDetailData.databaseName, connectionCallback);
+    detailVM = DeviceDetailVM(GetPackagesUseCase(), processCallback);
+    detailVM.createConnection(
+        deviceDetailData.deviceName,
+        deviceDetailData.packageName,
+        deviceDetailData.databaseName,
+        connectionCallback);
   }
 
-  void processCallback(Result result){
+  handleBackPress() {
+    detailVM.killOldProcess();
+  }
+
+  void processCallback(Result result) {
     setState(() {
-      if(result is Success){
+      if (result is Success) {
         outputStringBuilder.writeln(result.data);
-      }else if (result is Fail){
+      } else if (result is Fail) {
         outputStringBuilder.writeln(result.e);
       }
     });
   }
 
-  void connectionCallback(Result result){
+  void connectionCallback(Result result) {
     setState(() {
-      if(result is Success){
+      if (result is Success) {
         outputStringBuilder.writeln(result.data);
-      }else if(result is Fail){
+      } else if (result is Fail) {
         outputStringBuilder.writeln(result.e);
       }
     });
@@ -79,10 +87,11 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
 
   void handleUpdateTableName() {}
 
-  
-
   @override
   Widget build(BuildContext context) {
+    var activityState = Activity.of(context);
+    activityState.backPressService.onBackPress = handleBackPress;
+
     double tableNameFieldWidth = 150;
     return Container(
       child: Column(
@@ -101,7 +110,8 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
                 margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: TextField(
                   decoration: InputDecoration(
-                      border: UnderlineInputBorder(), hintText: 'Enter databse name'),
+                      border: UnderlineInputBorder(),
+                      hintText: 'Enter databse name'),
                 ),
               ),
             )
