@@ -54,7 +54,12 @@ class PackageTableDao extends DatabaseAccessor<AppDatabase>
         .get();
   }
 
-  Future<int> insertOrUpdateRecord(PackageTableCompanion package) async{
+  Future<int> insertOrUpdateRecord(PackageTableCompanion package) async {
+    if (package.isEnabled.value) {
+      update(packageTable)
+        ..where((it) => it.isEnabled.equals(true))
+        ..write(PackageTableCompanion(isEnabled: Value(false)));
+    }
     List<PackageTableData> list = await _isPackagePresent(package.name.value);
     if (list.length == 0) {
       return into(packageTable).insert(package);
@@ -78,12 +83,18 @@ class MobileDbTableDao extends DatabaseAccessor<AppDatabase>
 
   Future<List<MobileDbTableData>> getEnabledDb() {
     return (select(mobileDbTable)
-      ..where((t) => t.isEnabled.equals(true))
-      ..limit(1))
+          ..where((t) => t.isEnabled.equals(true))
+          ..limit(1))
         .get();
   }
 
   Future<int> insertOrUpdateRecord(MobileDbTableCompanion data) async {
+    if (data.isEnabled.value) {
+      update(mobileDbTable)
+        ..where((it) => it.isEnabled.equals(true))
+        ..write(MobileDbTableCompanion(isEnabled: Value(false)));
+    }
+
     List<MobileDbTableData> list = await _isRecordPresent(data.name.value);
     if (list.length == 0) {
       return into(mobileDbTable).insert(data);
@@ -92,10 +103,10 @@ class MobileDbTableDao extends DatabaseAccessor<AppDatabase>
     }
   }
 
-  Future<List<MobileDbTableData>>_isRecordPresent(String data) {
+  Future<List<MobileDbTableData>> _isRecordPresent(String data) {
     return (select(mobileDbTable)
-      ..where((t) => t.name.equals(data))
-      ..limit(1))
+          ..where((t) => t.name.equals(data))
+          ..limit(1))
         .get();
   }
 }

@@ -15,12 +15,6 @@ class DeviceDetailVM {
     this.processCallback = processCallback;
   }
 
-  Future<void> getPackagesWhereLibraryIsInstalled(Function function) async {
-    Set<String> packageList = new Set();
-    packageList.add("com.rahullohra.gqldeveloperapp");
-    function(packageList);
-  }
-
   Future<void> getDatabases(String packageName) async {
     Future<ProcessResult> result = Process.run('adb', ['devices']);
     ProcessResult pr = await result;
