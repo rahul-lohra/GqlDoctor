@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:example_flutter/data/Result.dart';
 import 'package:example_flutter/domain/GetPackagesUseCase.dart';
 import 'package:example_flutter/presentation/HexColor.dart';
+import 'package:example_flutter/presentation/data/ButtonData.dart';
+import 'package:example_flutter/presentation/data/DeviceDetailAction.dart';
 import 'package:example_flutter/presentation/data/DeviceDetailData.dart';
 import 'package:example_flutter/presentation/routes/Router.dart';
 import 'package:example_flutter/presentation/viewmodels/DeviceDetailVM.dart';
@@ -9,6 +13,7 @@ import 'package:flutter/material.dart';
 
 class DeviceDetailActivity extends StatefulWidget {
   final DeviceDetailData deviceDetailData;
+
   const DeviceDetailActivity({Key key, this.deviceDetailData})
       : super(key: key);
 
@@ -20,15 +25,18 @@ class DeviceDetailActivity extends StatefulWidget {
 class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   final DeviceDetailData deviceDetailData;
   DeviceDetailVM detailVM;
-  StringBuffer outputStringBuilder;
   Widget historyWidgetList;
+  List<String> outputResultList = List();
+
+  final outputController = ScrollController();
+  final tableNameController = TextEditingController();
+  final dbNameController = TextEditingController();
 
   _DeviceDetailActivityState(this.deviceDetailData);
 
   @override
   void initState() {
     historyWidgetList = Container();
-    outputStringBuilder = StringBuffer();
     detailVM = DeviceDetailVM(GetPackagesUseCase(), processCallback);
     detailVM.createConnection(
         deviceDetailData.deviceName,
@@ -44,9 +52,9 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   void processCallback(Result result) {
     setState(() {
       if (result is Success) {
-        outputStringBuilder.writeln(result.data);
+        outputResultList.add(result.data);
       } else if (result is Fail) {
-        outputStringBuilder.writeln(result.e);
+        outputResultList.add(result.e.toString());
       }
     });
   }
@@ -54,43 +62,34 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   void connectionCallback(Result result) {
     setState(() {
       if (result is Success) {
-        outputStringBuilder.writeln(result.data);
+        outputResultList.add(result.data);
       } else if (result is Fail) {
-        outputStringBuilder.writeln(result.e);
+        outputResultList.add(result.e.toString());
       }
     });
   }
 
-  void showPackages(Set<String> packageList) {
-    setState(() {
-      setHistoryWidget(packageList.toList(growable: false));
-    });
+  void handleUpdateTableName(DeviceDetailAction action, BuildContext ctx) {
+    switch (action) {
+      case DeviceDetailAction.POP_BACK:
+        Router.popBackStack(ctx);
+        break;
+      default:
+        {
+          detailVM.performDatabaseOperations(action, tableNameController.text);
+        }
+    }
   }
-
-  void setHistoryWidget(List<String> packageList) {
-    historyWidgetList = Expanded(
-      child: ListView.builder(
-        itemCount: packageList.length,
-        itemBuilder: (BuildContext ctx, int index) {
-          return new Container(
-            child: GestureDetector(
-              child: Text(packageList[index]),
-              onTap: () {
-//                detailVM.connectEmulator(deviceName);
-              },
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void handleUpdateTableName() {}
 
   @override
   Widget build(BuildContext context) {
     var activityState = Activity.of(context);
     activityState.backPressService.onBackPress = handleBackPress;
+
+    Timer(
+        Duration(milliseconds: 1000),
+        () =>
+            outputController.jumpTo(outputController.position.maxScrollExtent));
 
     double tableNameFieldWidth = 150;
     return Container(
@@ -101,7 +100,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
               width: tableNameFieldWidth,
               margin: EdgeInsets.fromLTRB(16, 16, 0, 0),
               child: Text(
-                "Database name",
+                "Database name (N/A)",
                 style: TextStyle(fontSize: 18),
               ),
             ),
@@ -109,6 +108,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
               child: Container(
                 margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: TextField(
+                  controller: dbNameController,
                   decoration: InputDecoration(
                       border: UnderlineInputBorder(),
                       hintText: 'Enter databse name'),
@@ -129,6 +129,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
               child: Container(
                 margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: TextField(
+                  controller: tableNameController,
                   decoration: InputDecoration(
                       border: UnderlineInputBorder(),
                       hintText: 'Enter table name'),
@@ -144,7 +145,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
                 child: Container(
                   margin: EdgeInsets.all(10),
                   child: RaisedButton(
-                    onPressed: handleUpdateTableName,
+                    onPressed: null,
                     child: const Text('Update', style: TextStyle(fontSize: 20)),
                     color: Colors.blue,
                     textColor: Colors.white,
@@ -192,7 +193,12 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
             margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
             height: 100,
             width: double.infinity,
-            child: Text(outputStringBuilder.toString()),
+            child: ListView.builder(
+                controller: outputController,
+                itemCount: outputResultList.length,
+                itemBuilder: (BuildContext ctx, int pos) {
+                  return Text(outputResultList[pos]);
+                }),
             color: HexColor("#e5e5e5"),
           ),
           Row(
@@ -205,12 +211,12 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   }
 
   List<Widget> getCtaButtonList() {
-    List<String> list = List();
-    list.add("Create");
-    list.add("Read");
-    list.add("Update");
-    list.add("Delete");
-    list.add("Back");
+    List<ButtonData> list = List();
+    list.add(ButtonData("Create", DeviceDetailAction.CREATE));
+    list.add(ButtonData("Read", DeviceDetailAction.READ));
+    list.add(ButtonData("Update", DeviceDetailAction.UPDATE));
+    list.add(ButtonData("Delete", DeviceDetailAction.DELETE));
+    list.add(ButtonData("Back", DeviceDetailAction.POP_BACK));
 
     List<Widget> buttonList = List();
     list.forEach((it) {
@@ -219,59 +225,13 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
     return buttonList;
   }
 
-  Widget getCtaButton(String name) {
+  Widget getCtaButton(ButtonData buttonData) {
     return RaisedButton(
-      onPressed: handleUpdateTableName,
-      child: Text(name, style: TextStyle(fontSize: 20)),
+      onPressed: () => handleUpdateTableName(buttonData.action, context),
+      child: Text(buttonData.text, style: TextStyle(fontSize: 20)),
       color: Colors.blue,
       textColor: Colors.white,
       elevation: 5,
-    );
-  }
-
-  Widget getOldWidgets() {
-    return Column(
-      children: <Widget>[
-        TextField(
-          decoration: InputDecoration(
-              border: InputBorder.none, hintText: 'Enter a package'),
-        ),
-        historyWidgetList,
-        Text("Recent Searches"),
-        GestureDetector(
-          child: Text(
-            "Coonect Emulator",
-            style: TextStyle(fontSize: 18),
-          ),
-          onTap: () {
-//            detailVM.connectEmulator(deviceName);
-          },
-        ),
-        GestureDetector(
-          child: Text("Goto package", style: TextStyle(fontSize: 18)),
-          onTap: () {
-            detailVM.gotoPackage("com.rahullohra.gqldeveloperapp");
-          },
-        ),
-        GestureDetector(
-          child: Text("List files", style: TextStyle(fontSize: 18)),
-          onTap: () {
-            detailVM.listFiles();
-          },
-        ),
-        GestureDetector(
-          child: Text("Connect database", style: TextStyle(fontSize: 18)),
-          onTap: () {
-            detailVM.connectDatabase("gqlDb");
-          },
-        ),
-        GestureDetector(
-          child: Text("Show all tables", style: TextStyle(fontSize: 18)),
-          onTap: () {
-            detailVM.showAllTables();
-          },
-        ),
-      ],
     );
   }
 

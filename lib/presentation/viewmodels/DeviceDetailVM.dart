@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:example_flutter/data/Result.dart';
 import 'package:example_flutter/domain/GetPackagesUseCase.dart';
+import 'package:example_flutter/presentation/data/DeviceDetailAction.dart';
 
 class DeviceDetailVM {
   GetPackagesUseCase useCase;
@@ -22,13 +23,13 @@ class DeviceDetailVM {
     return result;
   }
 
-  void createConnection(String deviceName, String packageName, String databaseName, Function function){
+  Future<void> createConnection(String deviceName, String packageName, String databaseName, Function function) async {
     Result result;
     try{
-    connectEmulator(deviceName);
-    gotoPackage(packageName);
-    listFiles();
-    connectDatabase(databaseName);
+    await connectEmulator(deviceName);
+    await gotoPackage(packageName);
+    await listFiles();
+    await connectDatabase(databaseName);
     String message = "Connection to database Successfull";
     result = Success(message);
     }catch(err){
@@ -119,4 +120,28 @@ class DeviceDetailVM {
   }
 
   showTables(String dbName) {}
+
+  void performDatabaseOperations(DeviceDetailAction action, String tableName){
+    if(emulatorProcess == null){
+      processCallback(Fail(Exception("Cannor perform CRUD operations")));
+      return;
+    }
+
+    if(tableName.isEmpty){
+      processCallback(Fail(Exception("Please enter table name")));
+      return;
+    }
+
+    switch(action){
+      case DeviceDetailAction.READ:{
+        emulatorProcess.stdin.writeln(getAndroidSqlExp("select * from $tableName"));
+      }
+        break;
+      default:
+    }
+  }
+
+  String getAndroidSqlExp(String expression){
+    return expression +";";
+  }
 }

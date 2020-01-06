@@ -7,6 +7,9 @@ class Router {
       return Activity(destinationWidget: destinationWidget, title: title);
     }));
   }
+  static void popBackStack(BuildContext context){
+    Navigator.pop(context);
+  }
 }
 
 class HandleBackActivity extends InheritedWidget {

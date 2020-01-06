@@ -1,0 +1,1 @@
+enum DeviceDetailAction { CREATE, READ, UPDATE, DELETE, POP_BACK }
