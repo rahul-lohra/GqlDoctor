@@ -180,7 +180,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
               ),
             ],
           ),
-          getListView(3),
+          getListView(1),
           Container(
             margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
             alignment: Alignment.centerLeft,

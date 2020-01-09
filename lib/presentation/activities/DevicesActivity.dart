@@ -123,8 +123,8 @@ class _DevicesActivityState extends State<DevicesActivity> {
   }
 
   saveSettings() {
-//    devicesActivityVM.createOrUpdatePackage(
-//        packageController.text, cbPackageValue, dbController.text, cbDbValue);
+    devicesActivityVM.createOrUpdatePackage(
+        packageController.text, cbPackageValue, dbController.text, cbDbValue);
   }
 
   readValuesFromDatabase(PackageTableDao dao) async {
