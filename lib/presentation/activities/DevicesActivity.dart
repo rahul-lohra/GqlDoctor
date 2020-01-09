@@ -214,7 +214,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
                           child: TextField(
                             controller: packageController,
                             decoration: InputDecoration(
-                                border: InputBorder.none,
+                                border: OutlineInputBorder(),
                                 hintText: 'Enter a package'),
                           ),
                         ),
@@ -251,7 +251,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
                           child: TextField(
                             controller: dbController,
                             decoration: InputDecoration(
-                                border: InputBorder.none,
+                                border: OutlineInputBorder(),
                                 hintText: 'Enter database name'),
                           ),
                         ),
