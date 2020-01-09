@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:example_flutter/data/Result.dart';
-import 'package:example_flutter/domain/GetPackagesUseCase.dart';
+import 'package:example_flutter/domain/usecases/GetPackagesUseCase.dart';
 import 'package:example_flutter/presentation/data/DeviceDetailAction.dart';
 
 class DeviceDetailVM {
@@ -10,14 +10,16 @@ class DeviceDetailVM {
   Process emulatorProcess;
   Process sqlProcess;
   Function processCallback;
+  String adbPath;
 
-  DeviceDetailVM(GetPackagesUseCase getPackagesUseCase, Function processCallback) {
+  DeviceDetailVM(GetPackagesUseCase getPackagesUseCase, Function processCallback, String adbPath) {
     this.useCase = getPackagesUseCase;
     this.processCallback = processCallback;
+    this.adbPath = adbPath;
   }
 
   Future<void> getDatabases(String packageName) async {
-    Future<ProcessResult> result = Process.run('adb', ['devices']);
+    Future<ProcessResult> result = Process.run(adbPath, ['devices']);
     ProcessResult pr = await result;
     print(pr.stdout);
     return result;

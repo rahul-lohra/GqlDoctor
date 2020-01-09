@@ -37,7 +37,10 @@ class AppDatabase extends _$AppDatabase {
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
-    final file = File('db.sqlite');
+    final file = File('database/db.sqlite');
+    if(!file.existsSync()){
+      file.createSync(recursive: true);
+    }
     return VmDatabase(file);
   });
 }

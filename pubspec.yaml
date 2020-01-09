@@ -1,5 +1,5 @@
 name: example_flutter
-description: An example project for flutter-desktop-embedding.
+description: Gql testing tool
 
 version: 0.1.0
 
@@ -29,6 +29,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - database/
+    - android-platform-tools/
 
   # See https://github.com/flutter/flutter/wiki/Desktop-shells#fonts
   fonts:

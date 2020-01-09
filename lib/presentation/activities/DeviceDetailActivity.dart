@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:example_flutter/data/Result.dart';
-import 'package:example_flutter/domain/GetPackagesUseCase.dart';
+import 'package:example_flutter/domain/usecases/GetPackagesUseCase.dart';
 import 'package:example_flutter/presentation/HexColor.dart';
 import 'package:example_flutter/presentation/data/ButtonData.dart';
 import 'package:example_flutter/presentation/data/DeviceDetailAction.dart';
@@ -37,7 +37,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   @override
   void initState() {
     historyWidgetList = Container();
-    detailVM = DeviceDetailVM(GetPackagesUseCase(), processCallback);
+    detailVM = DeviceDetailVM(GetPackagesUseCase(), processCallback, deviceDetailData.adbPath);
     detailVM.createConnection(
         deviceDetailData.deviceName,
         deviceDetailData.packageName,

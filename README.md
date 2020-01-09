@@ -1,4 +1,4 @@
-# Desktop Flutter Example
+# Gql Testing tool
 
 This is the standard Flutter template application, modified to run on desktop.
 

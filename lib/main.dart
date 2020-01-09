@@ -18,10 +18,19 @@ void main() {
   var packageDao = Provider<PackageTableDao>(create: (_) => appDatabase.packageTableDao);
   var mobileDbDao = Provider<MobileDbTableDao>(create: (_) => appDatabase.mobileDbTableDao);
 
+  try{
   runApp(MultiProvider(
     providers: [packageDao,mobileDbDao],
     child: MyApp(),
   ));
+}catch(error){
+  File file = File("error.txt");
+  if(file.existsSync()){
+    file.createSync(recursive: true);
+  }
+  file.writeAsStringSync(error);
+}
+
 }
 
 class MyApp extends StatelessWidget {

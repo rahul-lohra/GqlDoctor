@@ -1,9 +1,10 @@
 import 'package:example_flutter/data/Devices.dart';
 import 'package:example_flutter/data/Result.dart';
 import 'package:example_flutter/data/moor_database.dart';
-import 'package:example_flutter/domain/GetDefaultConfigUseCase.dart';
-import 'package:example_flutter/domain/GetDevicesUseCase.dart';
-import 'package:example_flutter/domain/LocalRepository.dart';
+import 'package:example_flutter/domain/usecases/GetAdbUseCase.dart';
+import 'package:example_flutter/domain/usecases/GetDefaultConfigUseCase.dart';
+import 'package:example_flutter/domain/usecases/GetDevicesUseCase.dart';
+import 'package:example_flutter/domain/repositories/LocalRepository.dart';
 import 'package:example_flutter/presentation/activities/DeviceDetailActivity.dart';
 import 'package:example_flutter/presentation/data/DeviceDetailData.dart';
 import 'package:example_flutter/presentation/routes/Router.dart';
@@ -25,9 +26,11 @@ class _DevicesActivityState extends State<DevicesActivity> {
   int selectedEmulator = -1;
   bool cbPackageValue = false;
   bool cbDbValue = false;
+  String adbPath;
 
   final packageController = TextEditingController();
   final dbController = TextEditingController();
+  final adbTextController = TextEditingController();
 
   @override
   void initState() {
@@ -36,15 +39,18 @@ class _DevicesActivityState extends State<DevicesActivity> {
     var defaultConfigUseCase =
         GetDefaultConfigUseCase(LocalRepository(packageDao, mobileDbDao));
     devicesActivityVM =
-        DeviceActivityVM(GetDevicesUseCase(), defaultConfigUseCase);
+        DeviceActivityVM(GetDevicesUseCase(), defaultConfigUseCase, GetAdbUseCase());
 
     btnNext = getButtonNext();
     packageController.addListener(toggleButtonNext);
     dbController.addListener(toggleButtonNext);
+    adbTextController.addListener(toggleButtonNext);
 
     devicesActivityVM.getConnectedDevices(showDevices);
     devicesActivityVM.getDefaultPackageName(showDefaultPackageName);
     devicesActivityVM.getDefaultDbName(showDefaultDbName);
+    adbPath = devicesActivityVM.getAdbPath();
+    adbTextController.text =  adbPath;
   }
 
   void toggleButtonNext() {
@@ -117,8 +123,8 @@ class _DevicesActivityState extends State<DevicesActivity> {
   }
 
   saveSettings() {
-    devicesActivityVM.createOrUpdatePackage(
-        packageController.text, cbPackageValue, dbController.text, cbDbValue);
+//    devicesActivityVM.createOrUpdatePackage(
+//        packageController.text, cbPackageValue, dbController.text, cbDbValue);
   }
 
   readValuesFromDatabase(PackageTableDao dao) async {
@@ -129,7 +135,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
   void openDetailActivity(
       String deviceName, String packageName, String databaseName) {
     DeviceDetailData deviceDetailData =
-        DeviceDetailData(packageName, databaseName, deviceName);
+        DeviceDetailData(packageName, databaseName, deviceName, adbTextController.text);
     DeviceDetailActivity activity = DeviceDetailActivity(deviceDetailData: deviceDetailData);
     Router.routeTo(
         context,
@@ -274,6 +280,26 @@ class _DevicesActivityState extends State<DevicesActivity> {
                         ),
                       )
                     ]),
+                    Row(children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.fromLTRB(16, 0, 40, 0),
+                        child: Text(
+                          "Adb path",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                          child: TextField(
+                            controller: adbTextController,
+                            decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'Enter adb path'),
+                          ),
+                        ),
+                      )
+                    ]),
                     Container(
                       margin: EdgeInsets.fromLTRB(16, 20, 0, 0),
                       child: Row(
@@ -299,8 +325,8 @@ class _DevicesActivityState extends State<DevicesActivity> {
                                 style: TextStyle(fontSize: 20),
                               ),
                               onPressed: () {
-                                devicesActivityVM
-                                    .getConnectedDevices(showDevices);
+//                                devicesActivityVM
+//                                    .getConnectedDevices(showDevices);
                               },
                             ),
                           )
