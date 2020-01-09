@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:example_flutter/data/Result.dart';
 import 'package:example_flutter/domain/usecases/GetPackagesUseCase.dart';
+import 'package:example_flutter/domain/usecases/GetPrettyJsonUseCase.dart';
 import 'package:example_flutter/presentation/data/DeviceDetailAction.dart';
 
 class DeviceDetailVM {
@@ -11,11 +12,14 @@ class DeviceDetailVM {
   Process sqlProcess;
   Function processCallback;
   String adbPath;
+  GetPrettyJsonUseCase getPrettyJsonUseCase;
 
   DeviceDetailVM(GetPackagesUseCase getPackagesUseCase, Function processCallback, String adbPath) {
     this.useCase = getPackagesUseCase;
     this.processCallback = processCallback;
     this.adbPath = adbPath;
+
+    this.getPrettyJsonUseCase = GetPrettyJsonUseCase();
   }
 
   Future<void> getDatabases(String packageName) async {
@@ -143,7 +147,12 @@ class DeviceDetailVM {
     }
   }
 
+  String getPrettyJson(String json){
+    return getPrettyJsonUseCase.getPrettyJson(json);
+  }
+
   String getAndroidSqlExp(String expression){
     return expression +";";
   }
+
 }

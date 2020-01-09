@@ -1,1 +1,1 @@
-enum DeviceDetailAction { CREATE, READ, UPDATE, DELETE, POP_BACK }
+enum DeviceDetailAction { CREATE, READ, UPDATE, DELETE, PRETTY_JSON, POP_BACK }

@@ -31,13 +31,15 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   final outputController = ScrollController();
   final tableNameController = TextEditingController();
   final dbNameController = TextEditingController();
+  final jsonController = TextEditingController();
 
   _DeviceDetailActivityState(this.deviceDetailData);
 
   @override
   void initState() {
     historyWidgetList = Container();
-    detailVM = DeviceDetailVM(GetPackagesUseCase(), processCallback, deviceDetailData.adbPath);
+    detailVM = DeviceDetailVM(
+        GetPackagesUseCase(), processCallback, deviceDetailData.adbPath);
     detailVM.createConnection(
         deviceDetailData.deviceName,
         deviceDetailData.packageName,
@@ -47,6 +49,12 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
 
   handleBackPress() {
     detailVM.killOldProcess();
+  }
+
+  void updateHeight(double height) {
+    setState(() {
+
+    });
   }
 
   void processCallback(Result result) {
@@ -73,6 +81,14 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
     switch (action) {
       case DeviceDetailAction.POP_BACK:
         Router.popBackStack(ctx);
+        break;
+      case DeviceDetailAction.PRETTY_JSON:
+        {
+          String prettyJson = detailVM.getPrettyJson(jsonController.text);
+          setState(() {
+            jsonController.text = prettyJson;
+          });
+        }
         break;
       default:
         {
@@ -212,6 +228,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
 
   List<Widget> getCtaButtonList() {
     List<ButtonData> list = List();
+    list.add(ButtonData("Pretty Json", DeviceDetailAction.PRETTY_JSON));
     list.add(ButtonData("Create", DeviceDetailAction.CREATE));
     list.add(ButtonData("Read", DeviceDetailAction.READ));
     list.add(ButtonData("Update", DeviceDetailAction.UPDATE));
@@ -237,35 +254,62 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
 
   Widget getListView(int count) {
     return Expanded(
-      child: ListView.builder(
-          itemCount: count,
-          itemBuilder: (BuildContext ctx, int index) {
-            return Row(
-              children: <Widget>[
-                Container(
-                  margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                  width: 300,
-                  child: TextField(
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Column name',
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    margin: EdgeInsets.fromLTRB(0, 10, 10, 0),
+      child: Scrollbar(
+        child: ListView.builder(
+            itemCount: count,
+            itemBuilder: (BuildContext ctx, int index) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                    width: 300,
                     child: TextField(
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: 'Value',
+                        labelText: 'Column name',
                       ),
                     ),
                   ),
-                ),
-              ],
-            );
-          }),
+                  Flexible(
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                      height: 500,
+                      color: Colors.black26,
+                      margin: EdgeInsets.fromLTRB(0, 10, 10, 0),
+                      child: Stack(
+                        children: <Widget>[
+                          TextField(
+                            controller: jsonController,
+                            decoration: InputDecoration.collapsed(
+                                hintText: "Enter value"),
+                            maxLines: null,
+                          ),
+//                          getDraggableWidget()
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }),
+      ),
+    );
+  }
+
+  Widget getDraggableWidget() {
+    return Listener(
+      child: Container(
+        color: Colors.red,
+        width: 40,
+        height: 40,
+      ),
+      onPointerDown: (details) {
+
+      },
+      onPointerUp: (details) {},
+      onPointerMove: (details) {
+      },
     );
   }
 }

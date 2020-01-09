@@ -23,7 +23,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
   DeviceActivityVM devicesActivityVM;
   Widget resultDeviceWidget = Container();
   RaisedButton btnNext;
-  int selectedEmulator = -1;
+  int selectedEmulator = 0;
   bool cbPackageValue = false;
   bool cbDbValue = false;
   String adbPath;
@@ -113,6 +113,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
       } else if (resultDevices is Fail) {
         resultDeviceWidget = getExceptionWidget(resultDevices);
       }
+      btnNext = getButtonNext();
     });
   }
 
@@ -147,9 +148,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
   bool allDataIsReadyForOnNext() {
     bool textFieldsAreNotEmpty =
         packageController.text.isNotEmpty && dbController.text.isNotEmpty;
-    bool emulatorIsSelected = selectedEmulator > -1 &&
-        selectedEmulator < deviceList.length &&
-        deviceList.length > 0;
+    bool emulatorIsSelected = selectedEmulator < deviceList.length && deviceList.length > 0;
     return textFieldsAreNotEmpty && emulatorIsSelected;
   }
 
@@ -188,7 +187,6 @@ class _DevicesActivityState extends State<DevicesActivity> {
   RaisedButton getButtonNext() {
     return RaisedButton(
       onPressed: allDataIsReadyForOnNext() ? () => onNextButtonClick() : null,
-//      onPressed: onNextButtonClick,
       child: const Text('Next', style: TextStyle(fontSize: 20)),
       color: Colors.blue,
       textColor: Colors.white,
