@@ -6,6 +6,7 @@ import 'package:example_flutter/presentation/HexColor.dart';
 import 'package:example_flutter/presentation/data/ButtonData.dart';
 import 'package:example_flutter/presentation/data/DeviceDetailAction.dart';
 import 'package:example_flutter/presentation/data/DeviceDetailData.dart';
+import 'package:example_flutter/presentation/data/TableData.dart';
 import 'package:example_flutter/presentation/routes/Router.dart';
 import 'package:example_flutter/presentation/viewmodels/DeviceDetailVM.dart';
 import 'package:flutter/cupertino.dart';
@@ -27,11 +28,12 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   DeviceDetailVM detailVM;
   Widget historyWidgetList;
   List<String> outputResultList = List();
+  int fieldCount = 0;
 
   final outputController = ScrollController();
   final tableNameController = TextEditingController();
   final dbNameController = TextEditingController();
-  final jsonController = TextEditingController();
+  TableData tableData;
 
   _DeviceDetailActivityState(this.deviceDetailData);
 
@@ -52,9 +54,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   }
 
   void updateHeight(double height) {
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   void processCallback(Result result) {
@@ -77,24 +77,42 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
     });
   }
 
-  void handleUpdateTableName(DeviceDetailAction action, BuildContext ctx) {
+  void updateTableName() {
+    detailVM.readTableSchema(tableNameController.text, ((Map<String, String> columnDataTypes) {
+      setState(() {
+        fieldCount = columnDataTypes.length;
+        List<String> formattedColumns = columnDataTypes.keys.toList();
+        for (int i = 0; i < formattedColumns.length; ++i) {
+          formattedColumns[i] = formattedColumns[i].replaceAll(RegExp('`'), '');
+        }
+        tableData = TableData(fieldCount, formattedColumns);
+      });
+    }));
+  }
+
+  void handleBottomCta(DeviceDetailAction action, BuildContext ctx) {
     switch (action) {
       case DeviceDetailAction.POP_BACK:
         Router.popBackStack(ctx);
         break;
       case DeviceDetailAction.PRETTY_JSON:
         {
-          String prettyJson = detailVM.getPrettyJson(jsonController.text);
+          String prettyJson =
+          detailVM.getPrettyJson(getResponseEditingController().text);
           setState(() {
-            jsonController.text = prettyJson;
+            getResponseEditingController().text = prettyJson;
           });
         }
         break;
       default:
         {
-          detailVM.performDatabaseOperations(action, tableNameController.text);
+          detailVM.performDatabaseOperations(action, tableNameController.text, tableData);
         }
     }
+  }
+
+  TextEditingController getResponseEditingController() {
+    return tableData.valueEditor[0];
   }
 
   @override
@@ -104,34 +122,13 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
 
     Timer(
         Duration(milliseconds: 1000),
-        () =>
+            () =>
             outputController.jumpTo(outputController.position.maxScrollExtent));
 
     double tableNameFieldWidth = 150;
     return Container(
       child: Column(
         children: <Widget>[
-          Row(children: <Widget>[
-            Container(
-              width: tableNameFieldWidth,
-              margin: EdgeInsets.fromLTRB(16, 16, 0, 0),
-              child: Text(
-                "Database name (N/A)",
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            Expanded(
-              child: Container(
-                margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                child: TextField(
-                  controller: dbNameController,
-                  decoration: InputDecoration(
-                      border: UnderlineInputBorder(),
-                      hintText: 'Enter databse name'),
-                ),
-              ),
-            )
-          ]),
           Row(children: <Widget>[
             Container(
               width: tableNameFieldWidth,
@@ -161,7 +158,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
                 child: Container(
                   margin: EdgeInsets.all(10),
                   child: RaisedButton(
-                    onPressed: null,
+                    onPressed: () => {updateTableName()},
                     child: const Text('Update', style: TextStyle(fontSize: 20)),
                     color: Colors.blue,
                     textColor: Colors.white,
@@ -196,7 +193,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
               ),
             ],
           ),
-          getListView(1),
+          getListView(fieldCount),
           Container(
             margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
             alignment: Alignment.centerLeft,
@@ -226,13 +223,36 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
     );
   }
 
+  Widget getEnterDbName(double tableNameFieldWidth) {
+    return Row(children: <Widget>[
+      Container(
+        width: tableNameFieldWidth,
+        margin: EdgeInsets.fromLTRB(16, 16, 0, 0),
+        child: Text(
+          "Database name (N/A)",
+          style: TextStyle(fontSize: 18),
+        ),
+      ),
+      Expanded(
+        child: Container(
+          margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+          child: TextField(
+            controller: dbNameController,
+            decoration: InputDecoration(
+                border: UnderlineInputBorder(), hintText: 'Enter databse name'),
+          ),
+        ),
+      )
+    ]);
+  }
+
   List<Widget> getCtaButtonList() {
     List<ButtonData> list = List();
     list.add(ButtonData("Pretty Json", DeviceDetailAction.PRETTY_JSON));
     list.add(ButtonData("Create", DeviceDetailAction.CREATE));
     list.add(ButtonData("Read", DeviceDetailAction.READ));
-    list.add(ButtonData("Update", DeviceDetailAction.UPDATE));
-    list.add(ButtonData("Delete", DeviceDetailAction.DELETE));
+//    list.add(ButtonData("Update", DeviceDetailAction.UPDATE));
+//    list.add(ButtonData("Delete", DeviceDetailAction.DELETE));
     list.add(ButtonData("Back", DeviceDetailAction.POP_BACK));
 
     List<Widget> buttonList = List();
@@ -244,7 +264,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
 
   Widget getCtaButton(ButtonData buttonData) {
     return RaisedButton(
-      onPressed: () => handleUpdateTableName(buttonData.action, context),
+      onPressed: () => handleBottomCta(buttonData.action, context),
       child: Text(buttonData.text, style: TextStyle(fontSize: 20)),
       color: Colors.blue,
       textColor: Colors.white,
@@ -253,6 +273,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   }
 
   Widget getListView(int count) {
+    if (count == 0) return Container();
     return Expanded(
       child: Scrollbar(
         child: ListView.builder(
@@ -265,22 +286,36 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
                     margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
                     width: 300,
                     child: TextField(
+                      controller: tableData.columnEditor[index],
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'Column name',
                       ),
                     ),
                   ),
+                  DropdownButton(
+                    value: tableData.dropDownValue[index],
+                    onChanged: (String value) {
+                      setState(() {
+                        tableData.dropDownValue[index] = value;
+                      });
+                    },
+                    items: <String>['String', 'Int', 'Bool', 'Float']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                          child: Text(value), value: value);
+                    }).toList(),
+                  ),
                   Flexible(
                     child: Container(
                       padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                      height: 500,
+                      height: index == count - 1 ? 500 : 100,
                       color: Colors.black26,
                       margin: EdgeInsets.fromLTRB(0, 10, 10, 0),
                       child: Stack(
                         children: <Widget>[
                           TextField(
-                            controller: jsonController,
+                            controller: tableData.valueEditor[index],
                             decoration: InputDecoration.collapsed(
                                 hintText: "Enter value"),
                             maxLines: null,
@@ -304,12 +339,9 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
         width: 40,
         height: 40,
       ),
-      onPointerDown: (details) {
-
-      },
+      onPointerDown: (details) {},
       onPointerUp: (details) {},
-      onPointerMove: (details) {
-      },
+      onPointerMove: (details) {},
     );
   }
 }
