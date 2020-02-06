@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:example_flutter/data/Result.dart';
+import 'package:example_flutter/domain/usecases/ColumnNameUseCase.dart';
 import 'package:example_flutter/domain/usecases/GetPackagesUseCase.dart';
 import 'package:example_flutter/presentation/HexColor.dart';
 import 'package:example_flutter/presentation/data/ButtonData.dart';
@@ -41,7 +42,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   void initState() {
     historyWidgetList = Container();
     detailVM = DeviceDetailVM(
-        GetPackagesUseCase(), processCallback, deviceDetailData.adbPath);
+        GetPackagesUseCase(), ColumnNameUseCase(), processCallback, deviceDetailData.adbPath);
     detailVM.createConnection(
         deviceDetailData.deviceName,
         deviceDetailData.packageName,
@@ -81,11 +82,8 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
     detailVM.readTableSchema(tableNameController.text, ((Map<String, String> columnDataTypes) {
       setState(() {
         fieldCount = columnDataTypes.length;
-        List<String> formattedColumns = columnDataTypes.keys.toList();
-        for (int i = 0; i < formattedColumns.length; ++i) {
-          formattedColumns[i] = formattedColumns[i].replaceAll(RegExp('`'), '');
-        }
-        tableData = TableData(fieldCount, formattedColumns);
+//        List<String> formattedColumns = columnDataTypes.keys.toList();
+        tableData = TableData(fieldCount, columnDataTypes);
       });
     }));
   }
@@ -112,7 +110,16 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   }
 
   TextEditingController getResponseEditingController() {
-    return tableData.valueEditor[0];
+    int index = 0;
+    for (int i = 0; i < tableData.listOfListItemData.length; ++i) {
+        String value = tableData.listOfListItemData[i].colNameController.text;
+        if(value == 'response'){
+          index = i;
+          break;
+        }
+
+    }
+    return tableData.listOfListItemData[index].colValueController;
   }
 
   @override
@@ -283,39 +290,26 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Container(
-                    margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                    margin: EdgeInsets.fromLTRB(10, 30, 10, 0),
                     width: 300,
                     child: TextField(
-                      controller: tableData.columnEditor[index],
+                      controller: tableData.listOfListItemData[index].colNameController,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'Column name',
                       ),
                     ),
                   ),
-                  DropdownButton(
-                    value: tableData.dropDownValue[index],
-                    onChanged: (String value) {
-                      setState(() {
-                        tableData.dropDownValue[index] = value;
-                      });
-                    },
-                    items: <String>['String', 'Int', 'Bool', 'Float']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                          child: Text(value), value: value);
-                    }).toList(),
-                  ),
                   Flexible(
                     child: Container(
                       padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                      height: index == count - 1 ? 500 : 100,
+                      height: getHeightOfColumnValue(tableData.listOfListItemData[index].colNameController.text),
                       color: Colors.black26,
                       margin: EdgeInsets.fromLTRB(0, 10, 10, 0),
                       child: Stack(
                         children: <Widget>[
                           TextField(
-                            controller: tableData.valueEditor[index],
+                            controller: tableData.listOfListItemData[index].colValueController,
                             decoration: InputDecoration.collapsed(
                                 hintText: "Enter value"),
                             maxLines: null,
@@ -330,6 +324,13 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
             }),
       ),
     );
+  }
+
+  double getHeightOfColumnValue(String columnName) {
+    if (columnName == 'response') {
+      return 500;
+    }
+    return 80;
   }
 
   Widget getDraggableWidget() {

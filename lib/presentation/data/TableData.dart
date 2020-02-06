@@ -1,26 +1,28 @@
 import 'dart:collection';
 
+import 'package:example_flutter/presentation/data/ListItemData.dart';
 import 'package:example_flutter/presentation/data/SqlDataType.dart';
 import 'package:flutter/material.dart';
 
 class TableData {
   int fieldCount;
-  List<TextEditingController> columnEditor;
-  List<TextEditingController> valueEditor;
-  HashMap<TextEditingController, SqlDataType> valueEditorSqlDataTypeMap;
+  HashMap<TextEditingController, String> valueEditorSqlDataTypeMap;
   List<String> dropDownValue;
+  List<ListItemData> listOfListItemData;
 
-  TableData(int fieldCount, List<String> columnNames) {
+  TableData(int fieldCount, HashMap<String, String> columnNamesDataTypes) {
     this.fieldCount = fieldCount;
 
-    columnEditor = List(fieldCount);
-    valueEditor = List(fieldCount);
+    listOfListItemData = List();
     dropDownValue = List(fieldCount);
-    for (int i = 0; i < fieldCount; ++i) {
-      columnEditor[i] = TextEditingController();
-      columnEditor[i].text = columnNames[i];
-      valueEditor[i] = TextEditingController();
-      dropDownValue[i] = "String";
-    }
+
+    columnNamesDataTypes.forEach((String columnName, String columnDataType) {
+      TextEditingController columnTextEditingController = TextEditingController();
+      columnTextEditingController.text = columnName;
+
+      TextEditingController valueTextEditingController = TextEditingController();
+
+      listOfListItemData.add(ListItemData(columnTextEditingController, valueTextEditingController, columnDataType));
+    });
   }
 }

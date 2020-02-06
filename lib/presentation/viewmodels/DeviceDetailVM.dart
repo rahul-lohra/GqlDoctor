@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:example_flutter/data/Result.dart';
+import 'package:example_flutter/domain/usecases/ColumnNameUseCase.dart';
 import 'package:example_flutter/domain/usecases/GetPackagesUseCase.dart';
 import 'package:example_flutter/domain/usecases/GetPrettyJsonUseCase.dart';
 import 'package:example_flutter/presentation/data/DeviceDetailAction.dart';
 import 'package:example_flutter/presentation/data/EmulatorProcessCallback.dart';
+import 'package:example_flutter/presentation/data/ListItemData.dart';
 import 'package:example_flutter/presentation/data/TableData.dart';
 
 class DeviceDetailVM {
@@ -16,11 +18,13 @@ class DeviceDetailVM {
   Function processCallback;
   String adbPath;
   GetPrettyJsonUseCase getPrettyJsonUseCase;
+  ColumnNameUseCase columnNameUseCase;
   EmulatorProcessCallback emulatorProcessCallback;
 
-  DeviceDetailVM(GetPackagesUseCase getPackagesUseCase,
-      Function processCallback, String adbPath) {
+  DeviceDetailVM(GetPackagesUseCase getPackagesUseCase, ColumnNameUseCase columnNameUseCase, Function processCallback,
+      String adbPath) {
     this.useCase = getPackagesUseCase;
+    this.columnNameUseCase = columnNameUseCase;
     this.processCallback = processCallback;
     this.adbPath = adbPath;
 
@@ -164,25 +168,35 @@ class DeviceDetailVM {
         break;
       case DeviceDetailAction.CREATE:
         {
-          int length = tableData.columnEditor.length;
+          var colNamesList = tableData.listOfListItemData.map((it) => it.colNameController.text.toString()).toList();
+          Map<String, int> timeMap = getCreatedAtAndUpdatedAt();
+          String columnNameExpression = getColExpressions(colNamesList, timeMap);
+          String valuesExpression = getValueExpressions(tableData.listOfListItemData, timeMap);
 
-          var colNamesList =
-          tableData.columnEditor.map((it) => it.text.toString()).toList();
-          var valuesList =
-          tableData.valueEditor.map((it) => it.text.toString()).toList();
-          String columnNameExpression = getColExpressions(colNamesList);
-          String valuesExpression = getColExpressions(valuesList);
+          String createExp = "INSERT INTO $tableName $columnNameExpression VALUES $valuesExpression";
 
-          String createExp =
-              "INSERT INTO $tableName $columnNameExpression VALUES $valuesExpression";
-          //todo Rahul valuesExpression needs special care
-          // As all string values must in encoded within within single quotes like - 'some value'
-          //throw exception when column name is not present
+          emulatorProcessCallback = EmulatorProcessCallback();
+          emulatorProcessCallback.success = (String result) {
+            print("Success write");
+          };
+          emulatorProcessCallback.fail = () {
+            print("fail write");
+          };
           emulatorProcess.stdin.writeln(getAndroidSqlExp(createExp));
         }
         break;
       default:
     }
+  }
+
+  Map<String, int> getCreatedAtAndUpdatedAt() {
+    int currentTime = DateTime
+        .now()
+        .millisecondsSinceEpoch;
+    Map<String, int> map = HashMap();
+    map['createdAt'] = currentTime;
+    map['updatedAt'] = currentTime;
+    return map;
   }
 
   void readTableSchema(String tableName, Function callback) {
@@ -192,46 +206,73 @@ class DeviceDetailVM {
       List<String> list = schemaString.split(',');
       Map<String, String> colNameDataType = HashMap();
       if (list.length > 1) {
-        list.skip(1).forEach((f) =>
-        {
-          colNameDataType[f.split(' ')[1]] = f.split(' ')[2]
-        });
+        for (int i = 1; i < list.length; ++i) {
+          String f = list[i];
+          String key = f.split(' ')[1].replaceAll(RegExp('`'), '');
+          String value = f.split(' ')[2];
+          if (columnNameUseCase.getAllowedColumnNames().contains(key)) {
+            colNameDataType[key] = value;
+          }
+        }
       }
 
       //list[0] = CREATE TABLE `RestResponse` (`id` INTEGER PRIMARY KEY AUTOINCREMENT
       List<String> items = list[0].split('(')[1].split(' ');
-      colNameDataType[items[0]] = items[1];
+      String key = items[0].replaceAll(RegExp('`'), '');
+      if (columnNameUseCase.getAllowedColumnNames().contains(key)) {
+        colNameDataType[key] = items[1];
+      }
 
       callback(colNameDataType);
     };
+
     emulatorProcessCallback.fail = () {
 
     };
+
     emulatorProcess.stdin.writeln(".schema $tableName");
   }
 
-  String getColExpressions(List<String> text) {
+  String getColExpressions(List<String> textList, Map<String, int> timeMap) {
     StringBuffer sb = new StringBuffer();
     sb.write("(");
-    for (int i = 0; i < text.length; ++i) {
-      sb.write(text);
-      if (i != text.length - 1) {
+    for (int i = 0; i < textList.length; ++i) {
+      sb.write(textList[i]);
+      if (i != textList.length - 1) {
         sb.write(",");
       }
     }
+
+    timeMap.forEach((key,value){
+      sb.write(",");
+      sb.write(key);
+    });
+
     sb.write(")");
     return sb.toString();
   }
 
-  String getValueExpressions(List<String> text) {
+  String getValueExpressions(List<ListItemData> listOfListItemData, Map<String, int> timeMap) {
     StringBuffer sb = new StringBuffer();
     sb.write("(");
-    for (int i = 0; i < text.length; ++i) {
+    for (int i = 0; i < listOfListItemData.length; ++i) {
+      String dataType = listOfListItemData[i].dataType;
+      String text = listOfListItemData[i].colValueController.text;
+      sb.write("'");
       sb.write(text);
-      if (i != text.length - 1) {
+      sb.write("'");
+
+      if (i != listOfListItemData.length - 1) {
         sb.write(",");
       }
     }
+
+    timeMap.forEach((key,value){
+      sb.write(",");
+      sb.write("'");
+      sb.write(value);
+      sb.write("'");
+    });
     sb.write(")");
     return sb.toString();
   }
