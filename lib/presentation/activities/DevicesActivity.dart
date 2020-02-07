@@ -5,6 +5,7 @@ import 'package:example_flutter/domain/usecases/GetAdbUseCase.dart';
 import 'package:example_flutter/domain/usecases/GetDefaultConfigUseCase.dart';
 import 'package:example_flutter/domain/usecases/GetDevicesUseCase.dart';
 import 'package:example_flutter/domain/repositories/LocalRepository.dart';
+import 'package:example_flutter/presentation/HexColor.dart';
 import 'package:example_flutter/presentation/activities/DeviceDetailActivity.dart';
 import 'package:example_flutter/presentation/data/DeviceDetailData.dart';
 import 'package:example_flutter/presentation/routes/Router.dart';
@@ -218,6 +219,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
                           child: TextField(
                             controller: packageController,
                             decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: HexColor("#e0e0e0"))),
                                 border: OutlineInputBorder(),
                                 hintText: 'Enter a package'),
                           ),
@@ -255,6 +257,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
                           child: TextField(
                             controller: dbController,
                             decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: HexColor("#e0e0e0"))),
                                 border: OutlineInputBorder(),
                                 hintText: 'Enter database name'),
                           ),
@@ -292,6 +295,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
                           child: TextField(
                             controller: adbTextController,
                             decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: HexColor("#e0e0e0"))),
                                 border: OutlineInputBorder(),
                                 hintText: 'Enter adb path'),
                           ),
