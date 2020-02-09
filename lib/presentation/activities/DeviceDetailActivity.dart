@@ -322,10 +322,17 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
                   ),
                   Flexible(
                     child: Container(
+                      decoration: BoxDecoration(border: Border(
+                        top: BorderSide(width: 1.0,color: HexColor("#5BC3DA")),
+                        left: BorderSide(width: 1.0,color: HexColor("#5BC3DA")),
+                        right: BorderSide(width: 1.0,color: HexColor("#5BC3DA")),
+                        bottom: BorderSide(width: 1.0,color: HexColor("#5BC3DA"))
+                      ),
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                        color: HexColor("#F6F4E8"),),
                       padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                       height: getHeightOfColumnValue(tableData.listOfListItemData[index].colNameController.text),
-                      color: Colors.black26,
-                      margin: EdgeInsets.fromLTRB(0, 10, 10, 0),
+                      margin: EdgeInsets.fromLTRB(0, 28, 10, 0),
                       child: Stack(
                         children: <Widget>[
                           TextField(
