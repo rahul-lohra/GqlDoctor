@@ -39,19 +39,43 @@ class DeviceDetailVM {
   }
 
   Future<void> createConnection(String deviceName, String packageName,
-      String databaseName, Function function) async {
+      String databaseName, Function function, Function tableNameCallback) async {
     Result result;
     try {
       await connectEmulator(deviceName);
       await gotoPackage(packageName);
-      await listFiles();
       await connectDatabase(databaseName);
+      await listTables(tableNameCallback);
       String message = "Connection to database Successfull";
       result = Success(message);
     } catch (err) {
       result = Fail(err);
     }
     function(result);
+  }
+
+  Future<void> listTables(Function function) {
+    if (emulatorProcess == null) {
+      return null;
+    }
+    emulatorProcessCallback = EmulatorProcessCallback();
+    emulatorProcessCallback.success = (String result) {
+      List<String> tableNames = List();
+      result.split(RegExp("[\\s]")).forEach((String item) {
+        if(item == 'android_metadata'|| item == 'room_master_table'){
+          //DO nothing
+        } else if (item.length > 1) {
+          tableNames.add(item);
+        }
+        return "";
+      });
+      function(tableNames);
+      print("Success write");
+    };
+    emulatorProcessCallback.fail = () {
+      print("fail write");
+    };
+    emulatorProcess.stdin.writeln(".tables");
   }
 
   connectEmulator(String name) async {
@@ -164,6 +188,7 @@ class DeviceDetailVM {
       case DeviceDetailAction.READ:
         {
           emulatorProcess.stdin.writeln(getAndroidSqlExp("select * from $tableName"));
+          emulatorProcess.stdin.writeln(getAndroidSqlExp("show tables"));
         }
         break;
       case DeviceDetailAction.CREATE:
@@ -243,7 +268,7 @@ class DeviceDetailVM {
       }
     }
 
-    timeMap.forEach((key,value){
+    timeMap.forEach((key, value) {
       sb.write(",");
       sb.write(key);
     });
@@ -267,7 +292,7 @@ class DeviceDetailVM {
       }
     }
 
-    timeMap.forEach((key,value){
+    timeMap.forEach((key, value) {
       sb.write(",");
       sb.write("'");
       sb.write(value);

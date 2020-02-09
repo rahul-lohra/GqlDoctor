@@ -28,26 +28,57 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   final DeviceDetailData deviceDetailData;
   DeviceDetailVM detailVM;
   Widget historyWidgetList;
+  Widget dropDownTableNameWidget;
   List<String> outputResultList = List();
+  List<String> tableNames = List();
   int fieldCount = 0;
 
   final outputController = ScrollController();
-  final tableNameController = TextEditingController();
   final dbNameController = TextEditingController();
   TableData tableData;
+  String selectedTableName = "";
 
   _DeviceDetailActivityState(this.deviceDetailData);
 
   @override
   void initState() {
     historyWidgetList = Container();
+    dropDownTableNameWidget = Container();
     detailVM = DeviceDetailVM(
         GetPackagesUseCase(), ColumnNameUseCase(), processCallback, deviceDetailData.adbPath);
     detailVM.createConnection(
         deviceDetailData.deviceName,
         deviceDetailData.packageName,
         deviceDetailData.databaseName,
-        connectionCallback);
+        connectionCallback, (List<String> tableNames) {
+      setState(() {
+        this.tableNames = tableNames;
+      });
+    });
+  }
+
+  Widget dropDownTableName(List<String> tableNames) {
+    if (tableNames.length == 0) {
+      return Container();
+    }
+
+    if (selectedTableName == "") {
+      selectedTableName = tableNames[0];
+    }
+    return Container(
+      child: DropdownButton<String>(items: tableNames.map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+        value: selectedTableName,
+        onChanged: (String value) {
+          setState(() {
+            selectedTableName = value;
+          });
+        },),
+    );
   }
 
   handleBackPress() {
@@ -79,7 +110,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   }
 
   void updateTableName() {
-    detailVM.readTableSchema(tableNameController.text, ((Map<String, String> columnDataTypes) {
+    detailVM.readTableSchema(selectedTableName, ((Map<String, String> columnDataTypes) {
       setState(() {
         fieldCount = columnDataTypes.length;
 //        List<String> formattedColumns = columnDataTypes.keys.toList();
@@ -104,7 +135,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
         break;
       default:
         {
-          detailVM.performDatabaseOperations(action, tableNameController.text, tableData);
+          detailVM.performDatabaseOperations(action, selectedTableName, tableData);
         }
     }
   }
@@ -112,12 +143,11 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   TextEditingController getResponseEditingController() {
     int index = 0;
     for (int i = 0; i < tableData.listOfListItemData.length; ++i) {
-        String value = tableData.listOfListItemData[i].colNameController.text;
-        if(value == 'response'){
-          index = i;
-          break;
-        }
-
+      String value = tableData.listOfListItemData[i].colNameController.text;
+      if (value == 'response') {
+        index = i;
+        break;
+      }
     }
     return tableData.listOfListItemData[index].colValueController;
   }
@@ -141,21 +171,11 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
               width: tableNameFieldWidth,
               margin: EdgeInsets.fromLTRB(16, 18, 0, 0),
               child: Text(
-                "Table name",
+                "Select Table name",
                 style: TextStyle(fontSize: 18),
               ),
             ),
-            Expanded(
-              child: Container(
-                margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                child: TextField(
-                  controller: tableNameController,
-                  decoration: InputDecoration(
-                      border: UnderlineInputBorder(),
-                      hintText: 'Enter table name'),
-                ),
-              ),
-            )
+            Container(child: dropDownTableName(tableNames), margin: EdgeInsets.fromLTRB(20, 4, 0, 0),)
           ]),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
