@@ -38,7 +38,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
     final packageDao = Provider.of<PackageTableDao>(context, listen: false);
     final mobileDbDao = Provider.of<MobileDbTableDao>(context, listen: false);
     var defaultConfigUseCase =
-        GetDefaultConfigUseCase(LocalRepository(packageDao, mobileDbDao));
+    GetDefaultConfigUseCase(LocalRepository(packageDao, mobileDbDao));
     devicesActivityVM =
         DeviceActivityVM(GetDevicesUseCase(), defaultConfigUseCase, GetAdbUseCase());
 
@@ -51,7 +51,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
     devicesActivityVM.getDefaultPackageName(showDefaultPackageName);
     devicesActivityVM.getDefaultDbName(showDefaultDbName);
     adbPath = devicesActivityVM.getAdbPath();
-    adbTextController.text =  adbPath;
+    adbTextController.text = adbPath;
   }
 
   void toggleButtonNext() {
@@ -134,15 +134,14 @@ class _DevicesActivityState extends State<DevicesActivity> {
     list.forEach((t) => print("data =  ${t.name}"));
   }
 
-  void openDetailActivity(
-      String deviceName, String packageName, String databaseName) {
+  void openDetailActivity(String deviceName, String packageName, String databaseName) {
     DeviceDetailData deviceDetailData =
-        DeviceDetailData(packageName, databaseName, deviceName, adbTextController.text);
+    DeviceDetailData(packageName, databaseName, deviceName, adbTextController.text);
     DeviceDetailActivity activity = DeviceDetailActivity(deviceDetailData: deviceDetailData);
     Router.routeTo(
-        context,
-        activity,
-        deviceName,
+      context,
+      activity,
+      deviceName,
     );
   }
 
@@ -182,7 +181,11 @@ class _DevicesActivityState extends State<DevicesActivity> {
   }
 
   Widget getExceptionWidget(Fail fail) {
-    return Text("${fail.e}");
+    if(fail.e is NoDevicesException){
+      return Text("No Devices found", style: TextStyle(fontSize: 20),);
+    }else{
+      return Text("${fail.e}");
+    }
   }
 
   RaisedButton getButtonNext() {
@@ -312,24 +315,20 @@ class _DevicesActivityState extends State<DevicesActivity> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          Container(
-                            margin: EdgeInsets.fromLTRB(
-                              400,
-                              0,
-                              0,
-                              0,
-                            ),
-                            child: RaisedButton(
-                              color: Colors.blue,
-                              textColor: Colors.white,
-                              child: Text(
-                                "Refresh",
-                                style: TextStyle(fontSize: 20),
+                          Flexible(
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: RaisedButton(
+                                color: Colors.blue,
+                                textColor: Colors.white,
+                                child: Text(
+                                  "Refresh",
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                                onPressed: () {
+                                devicesActivityVM.getConnectedDevices(showDevices);
+                                },
                               ),
-                              onPressed: () {
-//                                devicesActivityVM
-//                                    .getConnectedDevices(showDevices);
-                              },
                             ),
                           )
                         ],
