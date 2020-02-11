@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:example_flutter/data/Result.dart';
+import 'package:example_flutter/data/TableMode.dart';
+import 'package:example_flutter/data/TableModeListItem.dart';
 import 'package:example_flutter/domain/usecases/ColumnNameUseCase.dart';
 import 'package:example_flutter/domain/usecases/GetPackagesUseCase.dart';
 import 'package:example_flutter/presentation/HexColor.dart';
@@ -10,7 +12,6 @@ import 'package:example_flutter/presentation/data/DeviceDetailData.dart';
 import 'package:example_flutter/presentation/data/TableData.dart';
 import 'package:example_flutter/presentation/routes/Router.dart';
 import 'package:example_flutter/presentation/viewmodels/DeviceDetailVM.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class DeviceDetailActivity extends StatefulWidget {
@@ -31,6 +32,8 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   Widget dropDownTableNameWidget;
   List<String> outputResultList = List();
   List<String> tableNames = List();
+  List<TableModeListItem> tableModeList = List();
+  TableModeListItem selectedTableModeItem;
   int fieldCount = 0;
 
   final outputController = ScrollController();
@@ -42,6 +45,11 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
 
   @override
   void initState() {
+    tableModeList.add(TableModeListItem("Add record", TableMode.CREATE));
+    tableModeList.add(TableModeListItem("Update record", TableMode.UPDATE));
+
+    selectedTableModeItem = tableModeList[0];
+
     historyWidgetList = Container();
     dropDownTableNameWidget = Container();
     detailVM = DeviceDetailVM(
@@ -152,6 +160,27 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
     return tableData.listOfListItemData[index].colValueController;
   }
 
+  Widget getTableModeWidget() {
+    return Container(
+      margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
+      child: DropdownButton<TableModeListItem>(
+        onChanged: (TableModeListItem value) {
+          setState(() {
+            selectedTableModeItem = value;
+          });
+        },
+        value: selectedTableModeItem,
+        items: tableModeList
+            .map<DropdownMenuItem<TableModeListItem>>((TableModeListItem value) {
+          return DropdownMenuItem<TableModeListItem>(
+            value: value,
+            child: Text(value.title),
+          );
+        }).toList()
+        ,),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var activityState = Activity.of(context);
@@ -170,30 +199,32 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
             Container(
               width: tableNameFieldWidth,
               margin: EdgeInsets.fromLTRB(16, 18, 0, 0),
-              child: Text(
-                "Select Table name",
-                style: TextStyle(fontSize: 18),
-              ),
+              child: Text("Select Table name", style: TextStyle(fontSize: 18),),
             ),
             Container(child: dropDownTableName(tableNames), margin: EdgeInsets.fromLTRB(20, 4, 0, 0),)
           ]),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Container(
-                  margin: EdgeInsets.all(10),
-                  child: RaisedButton(
-                    onPressed: () => {updateTableName()},
-                    child: const Text('Update', style: TextStyle(fontSize: 20)),
-                    color: Colors.blue,
-                    textColor: Colors.white,
-                    elevation: 5,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 18, 0, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Text("Select either mode", style: TextStyle(fontSize: 18)),
+                getTableModeWidget(),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Container(
+                    margin: EdgeInsets.fromLTRB(200,10,10,10),
+                    child: RaisedButton(
+                      onPressed: () => {updateTableName()},
+                      child: const Text('Get Columns', style: TextStyle(fontSize: 20)),
+                      color: Colors.blue,
+                      textColor: Colors.white,
+                      elevation: 5,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           Divider(
             color: Color(0xffe0e0e0),
@@ -323,10 +354,10 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
                   Flexible(
                     child: Container(
                       decoration: BoxDecoration(border: Border(
-                        top: BorderSide(width: 1.0,color: HexColor("#5BC3DA")),
-                        left: BorderSide(width: 1.0,color: HexColor("#5BC3DA")),
-                        right: BorderSide(width: 1.0,color: HexColor("#5BC3DA")),
-                        bottom: BorderSide(width: 1.0,color: HexColor("#5BC3DA"))
+                          top: BorderSide(width: 1.0, color: HexColor("#5BC3DA")),
+                          left: BorderSide(width: 1.0, color: HexColor("#5BC3DA")),
+                          right: BorderSide(width: 1.0, color: HexColor("#5BC3DA")),
+                          bottom: BorderSide(width: 1.0, color: HexColor("#5BC3DA"))
                       ),
                         borderRadius: BorderRadius.all(Radius.circular(5)),
                         color: HexColor("#F6F4E8"),),

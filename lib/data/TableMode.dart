@@ -1,0 +1,1 @@
+enum TableMode { CREATE, UPDATE, READ }
