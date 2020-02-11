@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 class Router {
-  static void routeTo(
-      BuildContext context, Widget destinationWidget, String title) {
+  static void routeTo(BuildContext context, Widget destinationWidget, String title) {
+
     Navigator.push(context, MaterialPageRoute(builder: (BuildContext ctx) {
       return Activity(destinationWidget: destinationWidget, title: title);
     }));
+
   }
+
   static void popBackStack(BuildContext context){
     Navigator.pop(context);
   }
@@ -64,7 +66,9 @@ class _ActivityState extends State<Activity> {
   }
 
   Future<bool> hello() {
-    backPressService.onBackPress();
+    if(backPressService.onBackPress != null) {
+      backPressService.onBackPress();
+    }
     return Future<bool>.value(true);
   }
 }

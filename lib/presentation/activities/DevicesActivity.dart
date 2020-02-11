@@ -6,6 +6,7 @@ import 'package:example_flutter/domain/usecases/GetDefaultConfigUseCase.dart';
 import 'package:example_flutter/domain/usecases/GetDevicesUseCase.dart';
 import 'package:example_flutter/domain/repositories/LocalRepository.dart';
 import 'package:example_flutter/presentation/HexColor.dart';
+import 'package:example_flutter/presentation/activities/AboutActivity.dart';
 import 'package:example_flutter/presentation/activities/DeviceDetailActivity.dart';
 import 'package:example_flutter/presentation/data/DeviceDetailData.dart';
 import 'package:example_flutter/presentation/routes/Router.dart';
@@ -138,11 +139,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
     DeviceDetailData deviceDetailData =
     DeviceDetailData(packageName, databaseName, deviceName, adbTextController.text);
     DeviceDetailActivity activity = DeviceDetailActivity(deviceDetailData: deviceDetailData);
-    Router.routeTo(
-      context,
-      activity,
-      deviceName,
-    );
+    Router.routeTo(context, activity, deviceName,);
   }
 
   bool allDataIsReadyForOnNext() {
@@ -181,9 +178,9 @@ class _DevicesActivityState extends State<DevicesActivity> {
   }
 
   Widget getExceptionWidget(Fail fail) {
-    if(fail.e is NoDevicesException){
+    if (fail.e is NoDevicesException) {
       return Text("No Devices found", style: TextStyle(fontSize: 20),);
-    }else{
+    } else {
       return Text("${fail.e}");
     }
   }
@@ -326,7 +323,7 @@ class _DevicesActivityState extends State<DevicesActivity> {
                                   style: TextStyle(fontSize: 20),
                                 ),
                                 onPressed: () {
-                                devicesActivityVM.getConnectedDevices(showDevices);
+                                  devicesActivityVM.getConnectedDevices(showDevices);
                                 },
                               ),
                             ),
