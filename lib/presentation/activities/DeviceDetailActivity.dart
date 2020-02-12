@@ -205,31 +205,32 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
               margin: EdgeInsets.fromLTRB(16, 18, 0, 0),
               child: Text("Select Table name", style: TextStyle(fontSize: 18),),
             ),
-            Container(child: dropDownTableName(tableNames), margin: EdgeInsets.fromLTRB(20, 4, 0, 0),)
-          ]),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 18, 0, 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Text("Select either mode", style: TextStyle(fontSize: 18)),
-                getTableModeWidget(),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Container(
-                    margin: EdgeInsets.fromLTRB(200, 10, 10, 10),
-                    child: RaisedButton(
-                      onPressed: () => {updateTableName()},
-                      child: const Text('Get Columns', style: TextStyle(fontSize: 20)),
-                      color: Colors.blue,
-                      textColor: Colors.white,
-                      elevation: 5,
+            Container(child: dropDownTableName(tableNames), margin: EdgeInsets.fromLTRB(20, 4, 0, 0),),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(500, 18, 0, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Text("Select either mode", style: TextStyle(fontSize: 18)),
+                  getTableModeWidget(),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(200, 10, 10, 10),
+                      child: RaisedButton(
+                        onPressed: () => {updateTableName()},
+                        child: const Text('Get Columns', style: TextStyle(fontSize: 20)),
+                        color: Colors.blue,
+                        textColor: Colors.white,
+                        elevation: 5,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+          ]),
+
           Divider(
             color: Color(0xffe0e0e0),
           ),
@@ -356,13 +357,15 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Container(
-                margin: EdgeInsets.fromLTRB(10, 30, 10, 0),
+                margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
                 width: 300,
+                height: 50,
                 child: TextField(
                   controller: tableData.listOfListItemData[index].colNameController,
                   decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: HexColor("#e0e0e0"))),
                     border: OutlineInputBorder(),
-                    labelText: 'Column name',
+                    hintText: 'Column name',
                   ),
                 ),
               ),
@@ -376,9 +379,9 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
                   ),
                     borderRadius: BorderRadius.all(Radius.circular(5)),
                     color: HexColor("#F6F4E8"),),
-                  padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                   height: getHeightOfColumnValue(tableData.listOfListItemData[index].colNameController.text),
-                  margin: EdgeInsets.fromLTRB(0, 28, 10, 0),
+                  margin: EdgeInsets.fromLTRB(0, 8, 10, 0),
                   child: Stack(
                     children: <Widget>[
                       TextField(
@@ -402,7 +405,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
     if (columnName == 'response') {
       return 500;
     }
-    return 80;
+    return 50;
   }
 
   Widget getDraggableWidget() {
