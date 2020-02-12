@@ -7,14 +7,15 @@ import 'package:flutter/material.dart';
 class TableData {
   int fieldCount;
   HashMap<TextEditingController, String> valueEditorSqlDataTypeMap;
-  List<String> dropDownValue;
   List<ListItemData> listOfListItemData;
 
-  TableData(int fieldCount, HashMap<String, String> columnNamesDataTypes) {
-    this.fieldCount = fieldCount;
-
+  TableData(HashMap<String, String> columnNamesDataTypes) {
     listOfListItemData = List();
-    dropDownValue = List(fieldCount);
+    prepareListOfListItemData(columnNamesDataTypes);
+    this.fieldCount = listOfListItemData.length;
+  }
+
+  void prepareListOfListItemData( HashMap<String, String> columnNamesDataTypes){
 
     columnNamesDataTypes.forEach((String columnName, String columnDataType) {
       TextEditingController columnTextEditingController = TextEditingController();
@@ -25,4 +26,5 @@ class TableData {
       listOfListItemData.add(ListItemData(columnTextEditingController, valueTextEditingController, columnDataType));
     });
   }
+
 }

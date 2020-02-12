@@ -10,6 +10,7 @@ import 'package:example_flutter/presentation/data/ButtonData.dart';
 import 'package:example_flutter/presentation/data/DeviceDetailAction.dart';
 import 'package:example_flutter/presentation/data/DeviceDetailData.dart';
 import 'package:example_flutter/presentation/data/TableData.dart';
+import 'package:example_flutter/presentation/data/UpdateTableData.dart';
 import 'package:example_flutter/presentation/routes/Router.dart';
 import 'package:example_flutter/presentation/viewmodels/DeviceDetailVM.dart';
 import 'package:flutter/material.dart';
@@ -34,11 +35,11 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   List<String> tableNames = List();
   List<TableModeListItem> tableModeList = List();
   TableModeListItem selectedTableModeItem;
-  int fieldCount = 0;
 
   final outputController = ScrollController();
   final dbNameController = TextEditingController();
   TableData tableData;
+  UpdateTableData updateTableData;
   String selectedTableName = "";
 
   _DeviceDetailActivityState(this.deviceDetailData);
@@ -120,9 +121,12 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   void updateTableName() {
     detailVM.readTableSchema(selectedTableName, ((Map<String, String> columnDataTypes) {
       setState(() {
-        fieldCount = columnDataTypes.length;
 //        List<String> formattedColumns = columnDataTypes.keys.toList();
-        tableData = TableData(fieldCount, columnDataTypes);
+        tableData = TableData(columnDataTypes);
+
+        if (selectedTableModeItem.tableMode == TableMode.UPDATE) {
+          updateTableData = UpdateTableData(columnDataTypes);
+        }
       });
     }));
   }
@@ -213,7 +217,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
                 Align(
                   alignment: Alignment.bottomRight,
                   child: Container(
-                    margin: EdgeInsets.fromLTRB(200,10,10,10),
+                    margin: EdgeInsets.fromLTRB(200, 10, 10, 10),
                     child: RaisedButton(
                       onPressed: () => {updateTableName()},
                       child: const Text('Get Columns', style: TextStyle(fontSize: 20)),
@@ -251,7 +255,9 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
               ),
             ],
           ),
-          getListView(fieldCount),
+//          getUpdateWidgetContainer(2, ),
+          getListView(updateTableData),
+         getListView(tableData),
           Container(
             margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
             alignment: Alignment.centerLeft,
@@ -330,59 +336,67 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
     );
   }
 
-  Widget getListView(int count) {
-    if (count == 0) return Container();
-    return Expanded(
-      child: Scrollbar(
-        child: ListView.builder(
-            itemCount: count,
-            itemBuilder: (BuildContext ctx, int index) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.fromLTRB(10, 30, 10, 0),
-                    width: 300,
-                    child: TextField(
-                      controller: tableData.listOfListItemData[index].colNameController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Column name',
-                      ),
-                    ),
-                  ),
-                  Flexible(
-                    child: Container(
-                      decoration: BoxDecoration(border: Border(
-                          top: BorderSide(width: 1.0, color: HexColor("#5BC3DA")),
-                          left: BorderSide(width: 1.0, color: HexColor("#5BC3DA")),
-                          right: BorderSide(width: 1.0, color: HexColor("#5BC3DA")),
-                          bottom: BorderSide(width: 1.0, color: HexColor("#5BC3DA"))
-                      ),
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                        color: HexColor("#F6F4E8"),),
-                      padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                      height: getHeightOfColumnValue(tableData.listOfListItemData[index].colNameController.text),
-                      margin: EdgeInsets.fromLTRB(0, 28, 10, 0),
-                      child: Stack(
-                        children: <Widget>[
-                          TextField(
-                            controller: tableData.listOfListItemData[index].colValueController,
-                            decoration: InputDecoration.collapsed(
-                                hintText: "Enter value"),
-                            maxLines: null,
-                          ),
-//                          getDraggableWidget()
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }),
-      ),
-    );
+  Widget getListView(TableData tableData) {
+    if (tableData == null || tableData.fieldCount == 0) return Container();
+    if (tableData is UpdateTableData) {
+      return Expanded(child: getListViewForTable(tableData),);
+    } else
+      return Expanded(
+        child: Scrollbar(
+          child: getListViewForTable(tableData),
+        ),
+      );
   }
+
+  Widget getListViewForTable(TableData tableData) {
+    return ListView.builder(
+        itemCount: tableData.fieldCount,
+        itemBuilder: (BuildContext ctx, int index) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.fromLTRB(10, 30, 10, 0),
+                width: 300,
+                child: TextField(
+                  controller: tableData.listOfListItemData[index].colNameController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Column name',
+                  ),
+                ),
+              ),
+              Flexible(
+                child: Container(
+                  decoration: BoxDecoration(border: Border(
+                      top: BorderSide(width: 1.0, color: HexColor("#5BC3DA")),
+                      left: BorderSide(width: 1.0, color: HexColor("#5BC3DA")),
+                      right: BorderSide(width: 1.0, color: HexColor("#5BC3DA")),
+                      bottom: BorderSide(width: 1.0, color: HexColor("#5BC3DA"))
+                  ),
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                    color: HexColor("#F6F4E8"),),
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                  height: getHeightOfColumnValue(tableData.listOfListItemData[index].colNameController.text),
+                  margin: EdgeInsets.fromLTRB(0, 28, 10, 0),
+                  child: Stack(
+                    children: <Widget>[
+                      TextField(
+                        controller: tableData.listOfListItemData[index].colValueController,
+                        decoration: InputDecoration.collapsed(
+                            hintText: "Enter value"),
+                        maxLines: null,
+                      ),
+//                          getDraggableWidget()
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        });
+  }
+
 
   double getHeightOfColumnValue(String columnName) {
     if (columnName == 'response') {
