@@ -340,7 +340,13 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   Widget getListView(TableData tableData) {
     if (tableData == null || tableData.fieldCount == 0) return Container();
     if (tableData is UpdateTableData) {
-      return Expanded(child: getListViewForTable(tableData),);
+      return Column(
+        children: <Widget>[
+          Text("Enter values with where Query",style: TextStyle(fontSize: 18),),
+          Container(height:150, child: getListViewForTable(tableData),),
+          Text("Enter values to be added (Below layout is scrollable)",style: TextStyle(fontSize: 18),),
+        ],
+      );
     } else
       return Expanded(
         child: Scrollbar(
