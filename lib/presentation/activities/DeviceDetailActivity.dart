@@ -131,7 +131,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
     }));
   }
 
-  void handleBottomCta(DeviceDetailAction action, BuildContext ctx) {
+  void handleBottomCta(DeviceDetailAction action, BuildContext ctx ,Function callback) {
     switch (action) {
       case DeviceDetailAction.POP_BACK:
         Router.popBackStack(ctx);
@@ -147,7 +147,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
         break;
       default:
         {
-          detailVM.performDatabaseOperations(action, selectedTableName, tableData);
+          detailVM.performDatabaseOperations(action, selectedTableName, tableData, updateTableData, callback);
         }
     }
   }
@@ -258,7 +258,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
           ),
 //          getUpdateWidgetContainer(2, ),
           getListView(updateTableData),
-         getListView(tableData),
+          getListView(tableData),
           Container(
             margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
             alignment: Alignment.centerLeft,
@@ -314,11 +314,12 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
   List<Widget> getCtaButtonList() {
     List<ButtonData> list = List();
     list.add(ButtonData("Pretty Json", DeviceDetailAction.PRETTY_JSON));
-    list.add(ButtonData("Create", DeviceDetailAction.CREATE));
+    if (selectedTableModeItem.tableMode == TableMode.CREATE) {
+      list.add(ButtonData("Create", DeviceDetailAction.CREATE));
+    } else {
+      list.add(ButtonData("Update", DeviceDetailAction.UPDATE));
+    }
     list.add(ButtonData("Read", DeviceDetailAction.READ));
-//    list.add(ButtonData("Update", DeviceDetailAction.UPDATE));
-//    list.add(ButtonData("Delete", DeviceDetailAction.DELETE));
-    list.add(ButtonData("Back", DeviceDetailAction.POP_BACK));
 
     List<Widget> buttonList = List();
     list.forEach((it) {
@@ -329,7 +330,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
 
   Widget getCtaButton(ButtonData buttonData) {
     return RaisedButton(
-      onPressed: () => handleBottomCta(buttonData.action, context),
+      onPressed: () => handleBottomCta(buttonData.action, context, null),
       child: Text(buttonData.text, style: TextStyle(fontSize: 20)),
       color: Colors.blue,
       textColor: Colors.white,
@@ -342,9 +343,26 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
     if (tableData is UpdateTableData) {
       return Column(
         children: <Widget>[
-          Text("Enter values with where Query",style: TextStyle(fontSize: 18),),
-          Container(height:150, child: getListViewForTable(tableData),),
-          Text("Enter values to be added (Below layout is scrollable)",style: TextStyle(fontSize: 18),),
+          Row(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(300, 0, 0, 0),
+                child: Text("Enter values with where Query", style: TextStyle(fontSize: 18),),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(600, 0, 0, 0),
+                child: RaisedButton(child: Text("Fill old data"), onPressed: () {
+                  handleBottomCta(DeviceDetailAction.GET_DATA, context, (){
+                    setState(() {
+
+                    });
+                  });
+                },),
+              )
+            ],
+          ),
+          Container(height: 150, child: getListViewForTable(tableData),),
+          Text("Enter values to be added (Below layout is scrollable)", style: TextStyle(fontSize: 18),),
         ],
       );
     } else

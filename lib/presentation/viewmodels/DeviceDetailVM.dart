@@ -10,6 +10,7 @@ import 'package:example_flutter/presentation/data/DeviceDetailAction.dart';
 import 'package:example_flutter/presentation/data/EmulatorProcessCallback.dart';
 import 'package:example_flutter/presentation/data/ListItemData.dart';
 import 'package:example_flutter/presentation/data/TableData.dart';
+import 'package:example_flutter/presentation/data/UpdateTableData.dart';
 
 class DeviceDetailVM {
   GetPackagesUseCase useCase;
@@ -62,7 +63,7 @@ class DeviceDetailVM {
     emulatorProcessCallback.success = (String result) {
       List<String> tableNames = List();
       result.split(RegExp("[\\s]")).forEach((String item) {
-        if(item == 'android_metadata'|| item == 'room_master_table'){
+        if (item == 'android_metadata' || item == 'room_master_table') {
           //DO nothing
         } else if (item.length > 1) {
           tableNames.add(item);
@@ -169,7 +170,8 @@ class DeviceDetailVM {
 
   showTables(String dbName) {}
 
-  void performDatabaseOperations(DeviceDetailAction action, String tableName, TableData tableData) {
+  void performDatabaseOperations(DeviceDetailAction action, String tableName, TableData tableData,
+      UpdateTableData updateTableData, Function callback) {
     if (tableData == null) {
       return;
     }
@@ -208,6 +210,60 @@ class DeviceDetailVM {
             print("fail write");
           };
           emulatorProcess.stdin.writeln(getAndroidSqlExp(createExp));
+        }
+        break;
+      case DeviceDetailAction.UPDATE:
+        {
+          if (updateTableData == null) {
+            return;
+          }
+
+          Map<String, int> timeMap = getCreatedAtAndUpdatedAt();
+          String valuesExpression = getValueExpressionsForUpdate(tableData.listOfListItemData, timeMap);
+          String whereExpression = getWhereExpressionsForGetData(updateTableData.listOfListItemData);
+
+          String updateExpression = "UPDATE $tableName SET $valuesExpression WHERE $whereExpression";
+
+          emulatorProcessCallback = EmulatorProcessCallback();
+          emulatorProcessCallback.success = (String result) {
+            print("Success update");
+          };
+          emulatorProcessCallback.fail = () {
+            print("Fail Update");
+          };
+          emulatorProcess.stdin.writeln(getAndroidSqlExp(updateExpression));
+        }
+        break;
+      case DeviceDetailAction.GET_DATA:
+        {
+          if (updateTableData == null) {
+            return;
+          }
+          var colNamesList = tableData.listOfListItemData.map((it) => it.colNameController.text.toString()).toList();
+          String columnNameExpression = getColExpressionsForGetData(colNamesList);
+          String whereExpression = getWhereExpressionsForGetData(updateTableData.listOfListItemData);
+          String selectExpression = "SELECT $columnNameExpression FROM $tableName WHERE $whereExpression LIMIT 1";
+
+          emulatorProcessCallback = EmulatorProcessCallback();
+          emulatorProcessCallback.success = (String result) {
+            print("Success select");
+            List<String> values = result.split("|");
+            for (int i = 0; i < values.length; ++i) {
+              String textValue = values[i];
+
+              if (i == values.length - 1) {
+                textValue = values[i].substring(0, values[i].length - 2);
+              }
+              tableData.listOfListItemData[i].colValueController.text = textValue;
+              if (callback != null) {
+                callback();
+              }
+            }
+          };
+          emulatorProcessCallback.fail = () {
+            print("Fail select");
+          };
+          emulatorProcess.stdin.writeln(getAndroidSqlExp(selectExpression));
         }
         break;
       default:
@@ -277,6 +333,20 @@ class DeviceDetailVM {
     return sb.toString();
   }
 
+  String getColExpressionsForGetData(List<String> textList) {
+    StringBuffer sb = new StringBuffer();
+
+    for (int i = 0; i < textList.length; ++i) {
+      sb.write(textList[i]);
+      if (i != textList.length - 1) {
+        sb.write(",");
+        sb.write(" ");
+      }
+    }
+
+    return sb.toString();
+  }
+
   String getValueExpressions(List<ListItemData> listOfListItemData, Map<String, int> timeMap) {
     StringBuffer sb = new StringBuffer();
     sb.write("(");
@@ -299,6 +369,64 @@ class DeviceDetailVM {
       sb.write("'");
     });
     sb.write(")");
+    return sb.toString();
+  }
+
+
+  String getValueExpressionsForUpdate(List<ListItemData> listOfListItemData, Map<String, int> timeMap) {
+    StringBuffer sb = new StringBuffer();
+    sb.write("(");
+    for (int i = 0; i < listOfListItemData.length; ++i) {
+      String columnName = listOfListItemData[i].colNameController.text;
+      sb.write("'");
+      sb.write(columnName);
+      sb.write("'");
+      sb.write(" = ");
+
+      String columnValue = listOfListItemData[i].colValueController.text;
+      sb.write("'");
+      sb.write(columnValue);
+      sb.write("'");
+
+      if (i != listOfListItemData.length - 1) {
+        sb.write(",");
+      }
+    }
+
+    timeMap.forEach((key, value) {
+      sb.write(",");
+      sb.write("'");
+      sb.write(key);
+      sb.write("'");
+
+      sb.write(" = ");
+
+      sb.write("'");
+      sb.write(value);
+      sb.write("'");
+    });
+    sb.write(")");
+    return sb.toString();
+  }
+
+  String getWhereExpressionsForGetData(List<ListItemData> listOfListItemData) {
+    StringBuffer sb = new StringBuffer();
+
+    for (int i = 0; i < listOfListItemData.length; ++i) {
+      String columnName = listOfListItemData[i].colNameController.text;
+      sb.write(columnName);
+      sb.write(" = ");
+
+      String columnValue = listOfListItemData[i].colValueController.text;
+      sb.write("'");
+      sb.write(columnValue);
+      sb.write("'");
+
+      if (i != listOfListItemData.length - 1) {
+        sb.write(" AND ");
+      }
+    }
+
     return sb.toString();
   }
 
