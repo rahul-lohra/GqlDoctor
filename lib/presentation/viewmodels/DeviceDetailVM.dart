@@ -252,7 +252,7 @@ class DeviceDetailVM {
               String textValue = values[i];
 
               if (i == values.length - 1) {
-                textValue = values[i].substring(0, values[i].length - 2);
+                textValue = values[i].substring(0, values[i].length - 1);
               }
               tableData.listOfListItemData[i].colValueController.text = textValue;
               if (callback != null) {
@@ -372,15 +372,11 @@ class DeviceDetailVM {
     return sb.toString();
   }
 
-
   String getValueExpressionsForUpdate(List<ListItemData> listOfListItemData, Map<String, int> timeMap) {
     StringBuffer sb = new StringBuffer();
-    sb.write("(");
     for (int i = 0; i < listOfListItemData.length; ++i) {
       String columnName = listOfListItemData[i].colNameController.text;
-      sb.write("'");
       sb.write(columnName);
-      sb.write("'");
       sb.write(" = ");
 
       String columnValue = listOfListItemData[i].colValueController.text;
@@ -405,7 +401,6 @@ class DeviceDetailVM {
       sb.write(value);
       sb.write("'");
     });
-    sb.write(")");
     return sb.toString();
   }
 

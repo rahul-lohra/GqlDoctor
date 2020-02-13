@@ -171,6 +171,10 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
         onChanged: (TableModeListItem value) {
           setState(() {
             selectedTableModeItem = value;
+
+            if(selectedTableModeItem.tableMode == TableMode.CREATE){
+              updateTableData = null;
+            }
           });
         },
         value: selectedTableModeItem,
@@ -207,7 +211,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
             ),
             Container(child: dropDownTableName(tableNames), margin: EdgeInsets.fromLTRB(20, 4, 0, 0),),
             Padding(
-              padding: const EdgeInsets.fromLTRB(500, 18, 0, 0),
+              padding: const EdgeInsets.fromLTRB(100, 18, 0, 0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
