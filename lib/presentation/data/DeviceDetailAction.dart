@@ -1,0 +1,1 @@
+enum DeviceDetailAction { CREATE, READ, UPDATE, DELETE, PRETTY_JSON, POP_BACK, GET_DATA }
