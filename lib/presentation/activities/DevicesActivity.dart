@@ -178,10 +178,10 @@ class _DevicesActivityState extends State<DevicesActivity> {
   }
 
   Widget getExceptionWidget(Fail fail) {
-    if (fail.e is NoDevicesException) {
+    if (fail.exception is NoDevicesException) {
       return Text("No Devices found", style: TextStyle(fontSize: 20),);
     } else {
-      return Text("${fail.e}");
+      return Text("${fail.getMessage()}");
     }
   }
 

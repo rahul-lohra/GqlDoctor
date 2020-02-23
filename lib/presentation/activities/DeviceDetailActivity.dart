@@ -103,7 +103,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
       if (result is Success) {
         outputResultList.add(result.data);
       } else if (result is Fail) {
-        outputResultList.add(result.e.toString());
+        outputResultList.add(result.getMessage());
       }
     });
   }
@@ -113,7 +113,7 @@ class _DeviceDetailActivityState extends State<DeviceDetailActivity> {
       if (result is Success) {
         outputResultList.add(result.data);
       } else if (result is Fail) {
-        outputResultList.add(result.e.toString());
+        outputResultList.add(result.getMessage());
       }
     });
   }
