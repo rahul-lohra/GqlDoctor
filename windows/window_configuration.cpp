@@ -14,8 +14,8 @@
 
 #include "window_configuration.h"
 
-const wchar_t *kFlutterWindowTitle = L"Droid Db explorer";
+const wchar_t *kFlutterWindowTitle = L"Flutter Desktop Example";
 const unsigned int kFlutterWindowOriginX = 10;
 const unsigned int kFlutterWindowOriginY = 10;
-const unsigned int kFlutterWindowWidth = 1200;
-const unsigned int kFlutterWindowHeight = 800;
+const unsigned int kFlutterWindowWidth = 800;
+const unsigned int kFlutterWindowHeight = 600;
